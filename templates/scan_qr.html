@@ -1,0 +1,567 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Scan QR Code - Staff
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <h1 class="text-center mb-4">📱 Scan Order QR Code</h1>
+      
+      <!-- Server Status Indicator -->
+      <div id="server-status" style="text-align: center; margin-bottom: 15px;">
+        <small id="status-text" style="color: #999;">Checking server...</small>
+      </div>
+      
+      <div class="card">
+        <div class="card-body">
+          <p class="text-muted">Point your camera at the customer's QR code to retrieve their order details.</p>
+          
+          <!-- Video element for camera -->
+          <div id="scanner-container" style="position: relative; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+            <video id="video" style="width: 100%; height: auto; max-height: 400px; display: block;"></video>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 2px solid #00ff00; width: 250px; height: 250px; border-radius: 8px;"></div>
+          </div>
+          
+          <!-- Manual input as fallback -->
+          <div class="form-group">
+            <label for="qr-input">Or enter QR code data manually:</label>
+            <input type="text" class="form-control" id="qr-input" placeholder="Paste QR code here...">
+            <div class="mt-2">
+              <button class="btn btn-primary" id="submit-qr">Search Order</button>
+              <button class="btn btn-secondary" id="test-connection">Test Connection</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order details result -->
+      <div id="result-container" style="display: none; margin-top: 30px;">
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">📦 Order Details</h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <p><strong>Order ID:</strong> <span id="result-order-id">-</span></p>
+                <p><strong>Customer Name:</strong> <span id="result-customer-name">-</span></p>
+                <p><strong>Phone:</strong> <span id="result-phone">-</span></p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Status:</strong> <span id="result-status" class="badge">-</span></p>
+                <p><strong>Table:</strong> <span id="result-table">-</span></p>
+                <p><strong>Order Time:</strong> <span id="result-time">-</span></p>
+              </div>
+            </div>
+            
+            <hr>
+            
+            <h6>Items:</h6>
+            <div id="result-items" style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+              -
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+<p>
+  <strong>Total Price:</strong>
+  <span id="result-price" style="font-size: 1.2rem; color: #28a745;">-</span><br>
+  <small class="text-muted">
+    Subtotal: <span id="result-subtotal">-</span> • Services: <span id="result-service-fees">-</span>
+  </small>
+</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Address:</strong> <span id="result-address">-</span></p>
+              </div>
+            </div>
+            
+            <hr>
+            
+            <div id="payment-status" style="padding: 15px; background: #fff3cd; border-radius: 5px; margin-bottom: 15px;">
+              <p id="payment-text">-</p>
+            </div>
+            
+            <div id="note-section" style="background: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+              <p><strong>Additional Notes:</strong></p>
+              <p id="result-note">-</p>
+            </div>
+            
+            <div class="text-center">
+              <button class="btn btn-warning" id="reset-btn">Scan Another QR</button>
+              <button class="btn btn-success" id="complete-btn" style="display: none;">Mark as Completed</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Error message -->
+      <div id="error-container" class="alert alert-danger" style="display: none; margin-top: 20px;">
+        <strong>Error:</strong> <span id="error-message">-</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include jsQR library for QR code scanning -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<script>
+  let video = document.getElementById('video');
+  let canvas = null;
+  let canvasContext = null;
+  let currentOrderId = null;
+
+  // Initialize video stream
+  function initializeCamera() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function(stream) {
+          video.srcObject = stream;
+          video.play();
+          scanQR();
+        })
+        .catch(function(error) {
+          console.log('Camera access denied or not available:', error);
+          document.getElementById('scanner-container').innerHTML = '<div style="padding: 20px; text-align: center; color: #999;"><p>📷 Camera not available</p><p style="font-size: 0.9rem;">Please use manual input below</p></div>';
+        });
+    } else {
+      console.log('Camera API not supported');
+      document.getElementById('scanner-container').innerHTML = '<div style="padding: 20px; text-align: center; color: #999;"><p>📷 Camera not available</p><p style="font-size: 0.9rem;">Please use manual input below</p></div>';
+    }
+  }
+
+  // Scan QR code from video
+  function scanQR() {
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvasContext = canvas.getContext('2d');
+      } else if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      }
+
+      canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 2 });
+
+      if (code && code.data) {
+        handleQRCodeScanned(code.data);
+        return;
+      }
+    }
+
+    requestAnimationFrame(scanQR);
+  }
+
+  // Handle QR code scanned
+  function handleQRCodeScanned(qrData) {
+    console.log('QR Code detected:', qrData);
+    document.getElementById('qr-input').value = qrData;
+    submitQR();
+  }
+
+  // Submit QR code to server with retry
+  function submitQR() {
+    const qrData = document.getElementById('qr-input').value.trim();
+    
+    if (!qrData) {
+      showError('Vui lòng nhập hoặc quét mã QR');
+      return;
+    }
+
+    console.log('Starting QR search...');
+    submitQRWithRetry(qrData, 0);
+  }
+  
+  // Retry logic for QR search
+  function submitQRWithRetry(qrData, retryCount = 0, maxRetries = 3) {
+    const MAX_RETRIES = maxRetries;
+    
+    console.time('QR_SEARCH_' + retryCount);
+    console.log('QR Search attempt', retryCount + 1, 'of', MAX_RETRIES + 1);
+
+    // Hide error and result containers
+    document.getElementById('error-container').style.display = 'none';
+    document.getElementById('result-container').style.display = 'none';
+    
+    // Show loading message with attempt counter
+    const loadingDiv = document.getElementById('error-container');
+    const attemptText = retryCount > 0 ? ` (Attempt ${retryCount + 1}/${MAX_RETRIES + 1})` : '';
+    loadingDiv.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div> <strong>Đang tìm kiếm đơn hàng...</strong><span id="timer">0s</span>' + attemptText;
+    loadingDiv.className = 'alert alert-info';
+    loadingDiv.style.display = 'block';
+    
+    let seconds = 0;
+    const timerInterval = setInterval(() => {
+      seconds++;
+      document.getElementById('timer').textContent = seconds + 's';
+    }, 1000);
+
+    // Send request to server with abort
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      console.log('Request timeout after 8 seconds');
+      controller.abort();
+    }, 8000); // 8 second timeout
+
+    fetch('/api/get_order_by_qr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ qr_code: qrData }),
+      signal: controller.signal
+    })
+    .then(response => {
+      clearTimeout(timeoutId);
+      console.timeEnd('QR_SEARCH_' + retryCount);
+      console.log('Response received:', response.status);
+      
+      if (!response.ok) {
+        throw new Error('HTTP_' + response.status);
+      }
+      return response.json();
+    })
+    .then(data => {
+      clearInterval(timerInterval);
+      console.log('Data received:', data.success ? 'Success' : 'Failed');
+      console.log('Full response:', JSON.stringify(data, null, 2));
+      console.log('data.success =', data.success);
+      console.log('data.order =', data.order);
+      
+      if (data.success && data.order) {
+        console.log('Order found, displaying...');
+        try {
+          displayOrderDetails(data.order);
+          currentOrderId = data.order.id;
+          console.log('Order displayed successfully, currentOrderId =', currentOrderId);
+          // Stop video scanning temporarily
+          if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+          }
+        } catch (err) {
+          console.error('Error displaying order:', err);
+          showError('Lỗi khi hiển thị thông tin đơn hàng: ' + err.message);
+        }
+      } else {
+        // Don't retry on logic errors, only on network errors
+        console.log('Logic error - data.success or data.order missing');
+        showError(data.message || 'Không tìm thấy đơn hàng. Vui lòng kiểm tra lại mã QR.');
+      }
+    })
+    .catch(error => {
+      clearInterval(timerInterval);
+      clearTimeout(timeoutId);
+      console.timeEnd('QR_SEARCH_' + retryCount);
+      console.error('Error:', error.name, error.message);
+      
+      // Retry on network errors
+      if ((error.name === 'AbortError' || error.message.includes('HTTP') || error.message.includes('TypeError')) && retryCount < MAX_RETRIES) {
+        console.log('Retrying... (' + (retryCount + 1) + '/' + MAX_RETRIES + ')');
+        setTimeout(() => {
+          submitQRWithRetry(qrData, retryCount + 1, MAX_RETRIES);
+        }, 1000); // Wait 1 second before retry
+      } else {
+        // Final error message
+        let errorMsg = 'Lỗi: ';
+        if (error.name === 'AbortError') {
+          errorMsg += 'Tìm kiếm quá lâu (timeout). ';
+        } else if (error.message.includes('HTTP')) {
+          errorMsg += 'Lỗi server (' + error.message + '). ';
+        } else {
+          errorMsg += error.message + '. ';
+        }
+        errorMsg += 'Vui lòng thử lại.';
+        showError(errorMsg);
+      }
+    });
+  }
+
+  // Display order details
+  function displayOrderDetails(order) {
+    console.log('=== DISPLAY ORDER DETAILS START ===');
+    console.log('Displaying order:', order);
+    console.log('Order type:', typeof order);
+    console.log('Order keys:', Object.keys(order));
+    
+    try {
+      console.log('Setting order ID...');
+      document.getElementById('result-order-id').textContent = order.id || '-';
+      console.log('✓ Order ID set to:', order.id);
+      
+      console.log('Setting customer name...');
+      document.getElementById('result-customer-name').textContent = order.customer_name || '-';
+      console.log('✓ Customer name set to:', order.customer_name);
+      
+      console.log('Setting phone...');
+      document.getElementById('result-phone').textContent = order.customer_phone || '-';
+      console.log('✓ Phone set to:', order.customer_phone);
+      
+      console.log('Setting address...');
+      document.getElementById('result-address').textContent = order.customer_address || '-';
+      console.log('✓ Address set to:', order.customer_address);
+      
+      console.log('Setting table...');
+      document.getElementById('result-table').textContent = order.table_reservation || 'No Reservation';
+      console.log('✓ Table set to:', order.table_reservation);
+      
+      // Parse and format date/time
+      console.log('Parsing date...');
+      const orderDate = new Date(order.created_at);
+      const formattedDate = orderDate.toLocaleDateString('vi-VN');
+      const formattedTime = orderDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('result-time').textContent = formattedDate + ' at ' + formattedTime;
+      console.log('✓ Time set to:', formattedDate, 'at', formattedTime);
+      
+      // Status badge
+      console.log('Setting status badge...');
+      const statusBadge = document.getElementById('result-status');
+      statusBadge.textContent = order.status || 'Unknown';
+      statusBadge.className = 'badge ' + getStatusColor(order.status);
+      console.log('✓ Status badge set to:', order.status);
+      
+      // Items with proper quantity and pricing
+      console.log('Processing items...');
+      try {
+        let itemsHtml = '';
+        
+        // Try to parse items as JSON
+        if (order.items) {
+          try {
+            // Check if it's a JSON array string
+            if (order.items.startsWith('[')) {
+              const itemsList = JSON.parse(order.items);
+              if (Array.isArray(itemsList)) {
+                itemsList.forEach((item, index) => {
+                  const itemName = item.name || item;
+                  const itemQty = item.quantity || order.quantity || 1;
+                  const itemPrice = item.price || order.price || 0;
+                  itemsHtml += `<div style="margin-bottom: 10px; padding: 8px; background: white; border-radius: 4px; border-left: 4px solid #28a745;">
+                    <strong>${itemName}</strong><br>
+                    <small style="color: #666;">Số lượng: ${itemQty} | Giá: ${formatPrice(itemPrice)} | Tổng: ${formatPrice(itemPrice * itemQty)}</small>
+                  </div>`;
+                });
+              } else {
+                itemsHtml = createItemDisplay(order.items, order.quantity || 1, order.price || 0);
+              }
+            } else {
+              itemsHtml = createItemDisplay(order.items, order.quantity || 1, order.price || 0);
+            }
+          } catch (parseError) {
+            console.log('Could not parse items as JSON:', parseError);
+            itemsHtml = createItemDisplay(order.items, order.quantity || 1, order.price || 0);
+          }
+        } else {
+          itemsHtml = '<p style="color: #999;">Không có sản phẩm</p>';
+        }
+        
+        document.getElementById('result-items').innerHTML = itemsHtml;
+        console.log('✓ Items rendered');
+      } catch (e) {
+        console.error('Error displaying items:', e);
+        document.getElementById('result-items').innerHTML = '<strong>' + (order.items || 'No items') + '</strong>';
+      }
+      
+      // Price
+      console.log('Setting price...');
+      document.getElementById('result-price').textContent = formatPrice(order.price || 0);
+      console.log('✓ Price set to:', formatPrice(order.price || 0));
+      
+      // Payment status - check note for payment info
+      console.log('Setting payment status...');
+      let paymentStatus = 'Chưa thanh toán';
+      let paymentColor = '#fff3cd';
+      let paymentIcon = '⏳';
+      
+      if (order.note) {
+        if (order.note.includes('Paid') || order.note.includes('Đã thanh toán')) {
+          paymentStatus = 'Đã thanh toán';
+          paymentColor = '#d4edda';
+          paymentIcon = '✓';
+        }
+      }
+      
+      document.getElementById('payment-status').style.background = paymentColor;
+      document.getElementById('payment-text').innerHTML = '<strong>Trạng thái thanh toán:</strong> <span style="color: #666;">' + paymentIcon + ' ' + paymentStatus + '</span>';
+      console.log('✓ Payment status set to:', paymentStatus);
+      
+      // Notes
+      console.log('Setting notes...');
+      document.getElementById('result-note').textContent = order.note || 'Không có ghi chú thêm';
+      console.log('✓ Notes set');
+      
+      // Show result container
+      console.log('Showing result container...');
+      document.getElementById('error-container').style.display = 'none';
+      document.getElementById('result-container').style.display = 'block';
+      console.log('✓ Result container displayed');
+      
+      // Show complete button only if status is not Completed
+      if (order.status !== 'Completed') {
+        document.getElementById('complete-btn').style.display = 'inline-block';
+      } else {
+        document.getElementById('complete-btn').style.display = 'none';
+      }
+      console.log('✓ Complete button visibility set');
+      
+      // Scroll to results
+      console.log('Scrolling to results...');
+      document.getElementById('result-container').scrollIntoView({ behavior: 'smooth' });
+      console.log('✓ Scrolled');
+      
+      console.log('=== DISPLAY ORDER DETAILS COMPLETE ===');
+    } catch (err) {
+      console.error('=== ERROR IN DISPLAY ORDER DETAILS ===', err);
+      throw err;
+    }
+  }
+  
+  // Helper function to create item display HTML
+  function createItemDisplay(itemName, quantity, price) {
+    const totalPrice = quantity * price;
+    return `<div style="padding: 8px; background: white; border-radius: 4px; border-left: 4px solid #28a745;">
+      <strong>${itemName}</strong><br>
+      <small style="color: #666;">Số lượng: ${quantity} | Giá: ${formatPrice(price)} | Tổng: ${formatPrice(totalPrice)}</small>
+    </div>`;
+  }
+
+  // Show error message
+  function showError(message) {
+    console.error('Error:', message);
+    document.getElementById('error-message').textContent = message;
+    document.getElementById('error-container').className = 'alert alert-danger';
+    document.getElementById('error-container').innerHTML = '<strong>❌ Error:</strong> <span id="error-message">' + message + '</span>';
+    document.getElementById('error-container').style.display = 'block';
+  }
+
+  // Format date time
+  function formatDateTime(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleString('vi-VN');
+  }
+
+  // Format price
+  function formatPrice(value) {
+    return (value || 0).toLocaleString('vi-VN') + ' VND';
+  }
+
+  // Get status color
+  function getStatusColor(status) {
+    switch (status) {
+      case 'Pending': return 'bg-warning text-dark';
+      case 'Completed': return 'bg-success';
+      case 'Cancelled': return 'bg-danger';
+      case 'Approved': return 'bg-info';
+      default: return 'bg-secondary';
+    }
+  }
+
+  // Get payment status from note
+  function getPaymentStatus(note) {
+    if (note.includes('Payment Status: Paid')) return 'Paid';
+    if (note.includes('Payment Status: Unpaid')) return 'Unpaid';
+    return 'Unknown';
+  }
+
+  // Test server connection
+  function testConnection() {
+    console.log('Testing server connection...');
+    document.getElementById('status-text').textContent = 'Testing...';
+    
+    fetch('/api/health')
+      .then(response => {
+        console.log('Server response:', response.status);
+        if (response.ok) {
+          document.getElementById('status-text').textContent = '✅ Server đang hoạt động';
+          document.getElementById('status-text').style.color = '#28a745';
+          return response.json();
+        } else {
+          throw new Error('HTTP ' + response.status);
+        }
+      })
+      .then(data => {
+        console.log('Server status:', data);
+      })
+      .catch(error => {
+        console.error('Connection test failed:', error);
+        document.getElementById('status-text').textContent = '❌ Không kết nối được máy chủ: ' + error.message;
+        document.getElementById('status-text').style.color = '#dc3545';
+      });
+  }
+
+  // Reset form
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    document.getElementById('qr-input').value = '';
+    document.getElementById('result-container').style.display = 'none';
+    document.getElementById('error-container').style.display = 'none';
+    currentOrderId = null;
+    
+    // Restart camera
+    initializeCamera();
+  });
+
+  // Test connection button
+  document.getElementById('test-connection').addEventListener('click', testConnection);
+
+  // Complete order button
+  document.getElementById('complete-btn').addEventListener('click', function() {
+    if (!currentOrderId) return;
+    
+    fetch('/api/complete_order/' + currentOrderId, {
+      method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Order marked as completed!');
+        document.getElementById('reset-btn').click();
+      } else {
+        showError(data.message || 'Failed to complete order');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showError('Error completing order. Please try again.');
+    });
+  });
+
+  // Submit button click
+  document.getElementById('submit-qr').addEventListener('click', submitQR);
+
+  // Enter key in input
+  document.getElementById('qr-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      submitQR();
+    }
+  });
+
+  // Initialize on page load
+  // Automatically test server connection on load and then initialize camera
+  testConnection();
+  initializeCamera();
+</script>
+
+<style>
+  #scanner-container {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+</style>
+{% endblock %}

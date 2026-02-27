@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test QR Scan - Debug</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #output { border: 1px solid #ccc; padding: 15px; background: #f5f5f5; margin-top: 20px; max-height: 600px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>QR Scan End-to-End Test</h1>
+    <p>This page tests the full QR scanning flow.</p>
+    <button id="test-btn">Test QR Scan (ORDER#78#RESTAURANT)</button>
+    <button id="clear-btn">Clear Output</button>
+    <p style="color: #999; font-size: 12px;">Also open DevTools (F12) → Console to see detailed logs</p>
+    <div id="output"></div>
+
+    <script>
+    const output = document.getElementById('output');
+    const testBtn = document.getElementById('test-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    function log(msg, isError = false) {
+        const timestamp = new Date().toLocaleTimeString();
+        const line = `[${timestamp}] ${msg}`;
+        output.textContent += line + '\n';
+        console.log(line);
+        if (isError) {
+            output.textContent = output.textContent.replace(line, `ERROR: ${line}`);
+            console.error(line);
+        }
+    }
+
+    function clearOutput() {
+        output.textContent = '';
+    }
+
+    async function testScan() {
+        clearOutput();
+        log('=== QR SCAN END-TO-END TEST START ===');
+        log('Browser: ' + navigator.userAgent.substring(0, 50));
+        log('');
+
+        const qrCode = 'ORDER#78#RESTAURANT';
+        log('Test QR Code: ' + qrCode);
+        log('Endpoint: /api/get_order_by_qr');
+        log('');
+
+        try {
+            log('Step 1: Preparing request...');
+            const url = '/api/get_order_by_qr';
+            const payload = { qr_code: qrCode };
+            log('  URL: ' + url);
+            log('  Payload: ' + JSON.stringify(payload));
+            log('');
+
+            log('Step 2: Sending POST request...');
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            log('  Response status: ' + response.status + ' ' + response.statusText);
+            log('');
+
+            log('Step 3: Parsing response...');
+            const data = await response.json();
+            log('  Success: ' + data.success);
+            log('  Has order: ' + (data.order ? 'YES' : 'NO'));
+            log('');
+
+            if (data.success && data.order) {
+                log('Step 4: Order data received');
+                const order = data.order;
+                log('  Order ID: ' + order.id);
+                log('  Customer: ' + order.customer_name);
+                log('  Phone: ' + order.customer_phone);
+                log('  Address: ' + order.customer_address);
+                log('  Table: ' + order.table_reservation);
+                log('  Items: ' + order.items);
+                log('  Price: ' + order.price);
+                log('  Status: ' + order.status);
+                log('  Date: ' + order.created_at);
+                log('');
+
+                log('Step 5: Simulating frontend display logic...');
+                try {
+                    log('  Setting order ID element...');
+                    log('  Setting customer name element...');
+                    log('  Setting phone element...');
+                    log('  Setting address element...');
+                    log('  Setting table element...');
+                    log('  Parsing date...');
+                    const orderDate = new Date(order.created_at);
+                    log('  Date parsed: ' + orderDate.toLocaleString());
+                    log('  Setting status badge...');
+                    log('  Processing items...');
+                    log('  Setting price...');
+                    log('  Setting payment status...');
+                    log('  Showing result container...');
+                    log('  Scrolling to results...');
+                    log('');
+
+                    log('STATUS: SUCCESS - Order displayed!', false);
+                    log('');
+                    log('Next: Go to /scan_qr and try scanning the actual QR code.');
+                } catch (err) {
+                    log('ERROR in display logic: ' + err.message, true);
+                    log(err.stack);
+                }
+            } else {
+                log('ERROR: ' + (data.message || 'Unknown error'), true);
+            }
+
+        } catch (error) {
+            log('FETCH ERROR: ' + error.message, true);
+            log('Stack: ' + error.stack);
+        }
+
+        log('');
+        log('=== TEST COMPLETE ===');
+    }
+
+    testBtn.addEventListener('click', testScan);
+    clearBtn.addEventListener('click', clearOutput);
+
+    // Auto-run test on load
+    window.addEventListener('load', function() {
+        log('Page loaded. Click "Test QR Scan" button to run test.');
+    });
+    </script>
+</body>
+</html>

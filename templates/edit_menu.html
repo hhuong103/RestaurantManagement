@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* General body and layout */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #eef2f7 0%, #d3dce6 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        /* Form container */
+        form {
+            width: 100%;
+            max-width: 650px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            animation: slideIn 0.5s ease-out;
+            border: 1px solid #e9ecef;
+        }
+
+        /* Animation */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form header */
+        form h2 {
+            margin-bottom: 35px;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #5e35b1;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        /* Input and label styling */
+        label {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #34495e;
+            display: block;
+            transition: color 0.3s ease;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            padding: 14px 18px;
+            margin-bottom: 25px;
+            font-size: 1rem;
+            border-radius: 12px;
+            border: 2px solid #dfe6e9;
+            background: #f9fbfc;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        input[type="file"]:focus {
+            border-color: #5e35b1;
+            box-shadow: 0 0 12px rgba(94, 53, 177, 0.2);
+            background: #fff;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 130px;
+        }
+
+        /* File input button styling */
+        input[type="file"]::-webkit-file-upload-button {
+            background: #5e35b1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        input[type="file"]::-webkit-file-upload-button:hover {
+            background: #4527a0;
+        }
+
+        /* Image preview */
+        .image-preview {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-preview img {
+            max-width: 250px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .image-preview img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Buttons container */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Submit button */
+        button {
+            flex: 1;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #fff;
+            background: linear-gradient(45deg, #5e35b1, #8e24aa);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #4527a0, #6d1b7b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(94, 53, 177, 0.3);
+        }
+
+        /* Cancel button */
+        .cancel-button {
+            flex: 1;
+            padding: 14px;
+            font-size: 1.1rem;
+            text-align: center;
+            color: #5e35b1;
+            background: #f1f3f5;
+            border: 2px solid #5e35b1;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-button:hover {
+            background: #e9ecef;
+            color: #4527a0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(94, 53, 177, 0.2);
+        }
+
+        /* Success and error messages */
+        .error, .success {
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c0392b;
+            border-color: #ffcdd2;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-color: #c8e6c9;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            form {
+                padding: 25px;
+            }
+
+            button, .cancel-button {
+                font-size: 1rem;
+                padding: 12px;
+            }
+
+            .image-preview img {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('edit_menu', item_id=item.id) }}">
+        <h2>Edit Menu Item</h2>
+
+        {% if success_message %}
+        <div class="success">{{ success_message }}</div>
+        {% endif %}
+
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" value="{{ item.name }}" placeholder="Enter menu name" required>
+
+        <label for="description">Description</label>
+        <textarea id="description" name="description" placeholder="Enter menu description" required>{{ item.description }}</textarea>
+
+        <label for="price">Price</label>
+        <input type="number" id="price" name="price" value="{{ item.price }}" step="0.01" placeholder="Enter menu price" required>
+
+        <label for="rating">Rating (1-5)</label>
+        <input type="number" id="rating" name="rating" value="{{ item.rating }}" step="0.1" min="1" max="5" placeholder="Enter rating" required>
+        <div class="mb-3">
+  <label class="form-label">Category</label>
+  <input class="form-control" name="category" placeholder="Ví dụ: Drinks, Dessert, Main Course"
+         value="{{ item.category if item else '' }}">
+</div>
+
+
+        <!-- Image Upload -->
+        <div>
+            <label for="image">Menu Image</label>
+            <input type="file" name="image" id="image" accept="image/*">
+            {% if item.image %}
+            <div class="image-preview">
+                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="Current Menu Image">
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Button Group with Swapped Positions -->
+        <div class="button-group">
+            <!-- Cancel button now on the left -->
+            <a href="{{ url_for('show_menu_list') }}" class="cancel-button">Cancel</a>
+            <!-- Save Changes button now on the right -->
+            <button type="submit">Save Changes</button>
+        </div>
+    </form>
+</body>
+</html>

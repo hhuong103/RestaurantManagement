@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Restaurant Menu
+{% endblock %}
+
+{% block content %}
+  <div class="container my-4">
+    <!-- Page Title -->
+    <h1 class="mb-4 text-center text-primary">Our Menu</h1>
+
+    <!-- Search Form -->
+    <form class="mb-4" method="GET" action="{{ url_for('search') }}">
+      <div class="input-group">
+        <input 
+          type="text" 
+          class="form-control shadow-sm" 
+          id="searchInput"
+          name="search" 
+          placeholder="Search by name..."
+          aria-label="Search"
+        >
+        <button class="btn btn-primary shadow-sm" type="submit">
+          <i class="fas fa-search"></i> Search
+        </button>
+      </div>
+    </form>
+
+    <!-- Menu Items -->
+    <div class="row">
+      {% for item in items %}
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card shadow-sm h-100">
+            <!-- Card Image -->
+            {% if item.image %}
+              <img 
+                src="{{ url_for('static', filename='uploads/' ~ item.image) }}" 
+                class="card-img-top" 
+                alt="{{ item.name }}" 
+                style="height: 200px; object-fit: cover;"
+              >
+            {% else %}
+              <div class="card-img-top d-flex align-items-center justify-content-center bg-light" 
+                   style="height: 200px;">
+                <p class="text-muted mb-0">No Image Available</p>
+              </div>
+            {% endif %}
+
+            <!-- Card Body -->
+            <div class="card-body">
+              <h5 class="card-title text-primary">{{ item.name }}</h5>
+              <p class="card-text text-secondary">{{ item.description }}</p>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="card-footer d-flex justify-content-between align-items-center">
+              <span class="fw-bold text-success">{{ "%.2f"|format(item.price) }}VND</span>
+              <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST" class="m-0">
+  <input type="hidden" name="quantity" value="1"/>
+  <button type="submit" class="btn btn-sm btn-outline-primary">
+    Add to Cart
+  </button>
+</form>
+
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      $("#searchInput").autocomplete({
+        source: function(request, response) {
+          $.ajax({
+            url: "/api/menu_suggestions",
+            dataType: "json",
+            success: function(data) {
+              // Filter suggestions based on input
+              var filtered = data.filter(function(item) {
+                return item.toLowerCase().includes(request.term.toLowerCase());
+              });
+              response(filtered.slice(0, 10)); // Limit to 10 suggestions
+            }
+          });
+        },
+        minLength: 1, // Start suggesting after 1 character
+        select: function(event, ui) {
+          // When user selects a suggestion, submit the form
+          $(this).val(ui.item.value);
+          $(this).closest('form').submit();
+        }
+      });
+    });
+  </script>
+{% endblock %}

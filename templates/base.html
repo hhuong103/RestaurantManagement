@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Restaurant{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- jQuery và jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Sidebar Styles -->
+    <style>
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        width: 250px;
+        height: 100vh;
+        background: #2b2d42;
+        padding-top: 60px;
+        transition: left 0.3s ease;
+        z-index: 999;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .sidebar-nav li {
+        margin: 0;
+      }
+
+      .sidebar-nav a {
+        display: block;
+        padding: 1rem 1.5rem;
+        color: #edf2f4;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+      }
+
+      .sidebar-nav a:hover {
+        background: rgba(239, 35, 60, 0.1);
+        color: #ef233c;
+        border-left-color: #ef233c;
+        padding-left: 2rem;
+      }
+
+      .sidebar-nav i {
+        margin-right: 0.75rem;
+        width: 20px;
+        text-align: center;
+      }
+
+      /* Navbar Adjustment */
+      .navbar {
+        position: relative;
+        z-index: 1000;
+      }
+
+      .sidebar-toggle {
+        background: none;
+        border: none;
+        color: #edf2f4;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        margin-right: 1rem;
+      }
+
+      .sidebar-toggle:hover {
+        color: #ef233c;
+      }
+
+      /* Overlay when sidebar is open */
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 100%;
+        }
+
+        .navbar-nav {
+          display: none;
+        }
+
+        .sidebar-toggle {
+          display: inline-block;
+        }
+      }
+
+      @media (min-width: 769px) {
+        .sidebar {
+          display: none;
+        }
+
+        .sidebar-toggle {
+          display: none;
+        }
+
+        /* Show as horizontal menu for desktop */
+        .admin-menu {
+          display: flex;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .admin-menu li {
+          margin: 0;
+        }
+
+        .admin-menu a {
+          padding: 1rem 1rem;
+          color: #edf2f4;
+          text-decoration: none;
+          transition: color 0.3s ease;
+        }
+
+        .admin-menu a:hover {
+          color: #ef233c;
+        }
+      }
+    </style>
+
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        background: #f8f1e9;
+        color: #333;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Playfair Display', serif;
+      }
+
+      /* Navbar */
+      .navbar {
+        background: #2b2d42;
+        padding: 1rem 0;
+      }
+
+      .navbar-brand, .nav-link {
+        color: #edf2f4 !important;
+        transition: color 0.3s ease;
+      }
+
+      .nav-link:hover {
+        color: #ef233c !important;
+      }
+
+      .btn-outline-secondary, .btn-outline-primary, .btn-outline-success {
+        border-radius: 20px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+      }
+
+      /* Hero Section */
+      .hero {
+        min-height: 80vh;
+        position: relative;
+      }
+
+      #hero-image {
+        transition: opacity 0.5s ease-in-out;
+        object-fit: cover;
+        max-height: 80vh;
+        width: 100%;
+      }
+
+      .hero-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #fff;
+      }
+
+      .hero-title {
+        font-family: 'Roboto', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+      }
+
+      .hero-description {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 400;
+        margin-bottom: 2rem;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+      }
+
+      .hero-btn {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #fff;
+        background: transparent;
+        border: 2px solid #fff;
+        border-radius: 25px;
+        padding: 0.75rem 2rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .hero-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: #fff;
+        color: #fff;
+      }
+
+      /* Sections */
+      .about, .features {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        padding: 3rem 0;
+        margin: 2rem 0;
+      }
+
+      .feature-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Footer */
+      footer {
+        background: #2b2d42;
+        color: #edf2f4;
+        padding: 3rem 0;
+      }
+
+      footer a {
+        color: #edf2f4;
+        transition: color 0.3s ease;
+      }
+
+      footer a:hover {
+        color: #ef233c;
+      }
+
+      footer .social-icons a {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+      }
+    </style>
+  </head>
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar for Admin -->
+<nav class="sidebar" id="adminSidebar">
+    <ul class="sidebar-nav">
+        {% if username and role == 'admin' %}
+        <li><a href="{{ url_for('dashboard') }}" class="sidebar-item"><i class="bi bi-speedometer"></i> Dashboard</a></li>
+        <li><a href="{{ url_for('show_menu_list') }}" class="sidebar-item"><i class="bi bi-book"></i> Menu</a></li>
+        <li><a href="{{ url_for('manage_tables') }}" class="sidebar-item"><i class="bi bi-grid-3x2"></i> Tables</a></li>
+        <li><a href="{{ url_for('list_orders') }}" class="sidebar-item"><i class="bi bi-bag-check"></i> Orders</a></li>
+        <li><a href="{{ url_for('user_list') }}" class="sidebar-item"><i class="bi bi-people"></i> Users</a></li>
+        <li><a href="/scan_qr" class="sidebar-item"><i class="bi bi-qr-code"></i> Scan QR</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark shadow">
+    <div class="container-fluid">
+      {% if username and role == 'admin' %}
+      <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="bi bi-list"></i>
+      </button>
+      {% endif %}
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="bi bi-house-door-fill"></i> My Restaurant
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          {% if not (username and role == 'admin') %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book-fill"></i> Menu
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+              <li><a class="dropdown-item" href="/"><i class="bi bi-list-ul"></i> View All</a></li>
+              <li><a class="dropdown-item" href="/search"><i class="bi bi-search"></i> Search Menu</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/cart"><i class="bi bi-cart-fill"></i> Cart</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('transaction_history') }}"><i class="bi bi-clock-history"></i> Transaction History</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('chatbot') }}"><i class="bi bi-chat-dots-fill"></i> Chatbot</a>
+          </li>
+          {% else %}
+          <!-- Admin navbar items for desktop -->
+          <li class="nav-item d-none d-lg-block">
+            <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer"></i> Dashboard</a>
+          </li>
+          <li class="nav-item d-none d-lg-block">
+            <a class="nav-link" href="{{ url_for('show_menu_list') }}"><i class="bi bi-book"></i> Menu</a>
+          </li>
+          <li class="nav-item d-none d-lg-block">
+            <a class="nav-link" href="{{ url_for('manage_tables') }}"><i class="bi bi-grid-3x2"></i> Tables</a>
+          </li>
+          <li class="nav-item d-none d-lg-block">
+            <a class="nav-link" href="{{ url_for('list_orders') }}"><i class="bi bi-bag-check"></i> Orders</a>
+          </li>
+          <li class="nav-item d-none d-lg-block">
+            <a class="nav-link" href="{{ url_for('user_list') }}"><i class="bi bi-people"></i> Users</a>
+          </li>
+          <li class="nav-item d-none d-lg-block">
+            <a class="nav-link" href="/scan_qr"><i class="bi bi-qr-code"></i> Scan QR</a>
+          </li>
+          {% endif %}
+        </ul>
+        <div class="d-flex align-items-center">
+          {% if username %}
+            <span class="me-3 fw-bold text-light"><i class="bi bi-person-circle"></i> {{ username }} - {{ role }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right"></i> Logout</a>
+          {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+            <a href="{{ url_for('register') }}" class="btn btn-outline-success"><i class="bi bi-person-plus-fill"></i> Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section with Slideshow -->
+  <section class="hero text-center text-white d-flex align-items-center justify-content-center">
+    <div class="position-relative w-100">
+      <img id="hero-image" src="{{ url_for('static', filename='res.jpg') }}" alt="Promo Image" class="img-fluid">
+      <div class="hero-text">
+        <h1 class="hero-title">Welcome to my restaurant.</h1>
+        <p class="hero-description">Serving you is our pleasure</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- JavaScript for Hero Section Slideshow -->
+  <script>
+    const heroImages = [
+      "{{ url_for('static', filename='res.jpg') }}",
+      "{{ url_for('static', filename='restaurant.jpg') }}",
+      "{{ url_for('static', filename='pic.jpg') }}",
+      "{{ url_for('static', filename='pics.jpg') }}"
+    ];
+    heroImages.forEach(src => {
+      const img = new Image();
+      img.src = src;
+      img.onerror = () => console.error(`Failed to load image: ${src}`);
+    });
+    let currentHeroIndex = 0;
+    const heroImageElement = document.getElementById('hero-image');
+    function changeHeroImage() {
+      heroImageElement.style.opacity = 0;
+      setTimeout(() => {
+        currentHeroIndex = (currentHeroIndex + 1) % heroImages.length;
+        heroImageElement.src = heroImages[currentHeroIndex];
+        heroImageElement.alt = `Promo Image ${currentHeroIndex + 1}`;
+        heroImageElement.style.opacity = 1;
+      }, 500);
+    }
+    heroImageElement.style.opacity = 0;
+    setTimeout(() => heroImageElement.style.opacity = 1, 500);
+    setInterval(changeHeroImage, 3000);
+  </script>
+
+  <!-- Main Content -->
+  <div class="container mt-5">
+    {% block content %}
+    <!-- About Section -->
+    <section class="about">
+      <div class="container">
+        <h2 class="text-center mb-5">Our Best Sellers</h2>
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h3 class="mb-4">Cheesy Baked Vegetable Rolls</h3>
+            <p>
+              Introduced by French colonialists in the mid-19th century, Vietnam has become one of the largest coffee exporters in the world. 
+              Our robusta beans and unique preparation methods elevate your coffee experience.
+            </p>
+            <div class="text-center my-4">
+              <img src="{{ url_for('static', filename='deco.jpg') }}" alt="Coffee Beans" class="img-fluid rounded shadow-sm">
+            </div>
+            <p>
+              Grown in the Central Highlands, our coffee thrives in ideal climates and fertile soils.
+            </p>
+          </div>
+          <div class="col-md-6">
+            <h3 class="text-center mb-4">About Us</h3>
+            <p>
+              Since our inception, we've celebrated Vietnamese coffee culture with a modern twist. 
+              Join us in the heart of the Central Highlands for an unparalleled dining experience.
+            </p>
+            <div class="text-center my-4">
+              <img src="{{ url_for('static', filename='image.jpg') }}" alt="Coffee Image" class="img-fluid rounded shadow-sm">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features py-5">
+      <div class="container">
+        <h2 class="text-center mb-5">Why Choose Us</h2>
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-3">
+            <div class="feature-card text-center p-4">
+              <img src="{{ url_for('static', filename='delivery_icon.jpg') }}" alt="Fast Delivery" class="img-fluid mb-3">
+              <h5 class="fw-bold">Fastest Door Delivery</h5>
+              <p>Enjoy your meal delivered swiftly to your doorstep.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="feature-card text-center p-4">
+              <img src="{{ url_for('static', filename='vegetables.jpg') }}" alt="Fresh Beans" class="img-fluid mb-3">
+              <h5 class="fw-bold">Fresh Coffee Beans</h5>
+              <p>Sourced directly from Vietnam’s finest plantations.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="feature-card text-center p-4">
+              <img src="{{ url_for('static', filename='quality_icon.jpg') }}" alt="Quality" class="img-fluid mb-3">
+              <h5 class="fw-bold">Best Quality Coffee</h5>
+              <p>Uncompromising standards for every cup.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="feature-card text-center p-4">
+              <img src="{{ url_for('static', filename='booking_icon.jpg') }}" alt="Booking" class="img-fluid mb-3">
+              <h5 class="fw-bold">Online Table Booking</h5>
+              <p>Reserve your spot with ease.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Offer Section -->
+    <section class="hero text-center text-white d-flex align-items-center justify-content-center">
+      <div class="container-fluid p-0 position-relative">
+        <img src="{{ url_for('static', filename='bg.jpg') }}" alt="Coffee Shop" class="img-fluid w-100" style="max-height: 60vh; object-fit: cover;">
+        <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 p-5 rounded">
+          <h2 class="display-4 fw-bold">50% OFF</h2>
+          <p class="lead">Sunday Special Offer</p>
+          <p>Valid Sundays from Jan 1st to Jan 30th, 2025</p>
+          <form class="d-flex justify-content-center">
+            <input type="email" class="form-control me-2" placeholder="Your Email" style="max-width: 250px; border-radius: 20px;">
+            <button class="btn btn-warning" style="border-radius: 20px;">Sign Up</button>
+          </form>
+        </div>
+      </div>
+    </section>
+    {% endblock %}
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <h5 class="fw-bold">My Restaurant</h5>
+          <p class="small">
+            Crafting exceptional coffee and cuisine since 2020. Visit us for a taste of tradition and innovation.
+          </p>
+        </div>
+        <div class="col-md-4 mb-4">
+          <h5 class="fw-bold">Quick Links</h5>
+          <ul class="list-unstyled">
+            <li><a href="/"><i class="bi bi-house-door-fill me-2"></i>Home</a></li>
+            <li><a href="/cart"><i class="bi bi-cart-fill me-2"></i>Cart</a></li>
+            <li><a href="{{ url_for('transaction_history') }}"><i class="bi bi-clock-history me-2"></i>Transaction History</a></li>
+            {% if username and role == 'admin' %}
+              <li><a href="{{ url_for('dashboard') }}"><i class="bi bi-bar-chart-fill me-2"></i>Dashboard</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        <div class="col-md-4 mb-4">
+          <h5 class="fw-bold">Contact Us</h5>
+          <p class="small">
+            <i class="bi bi-geo-alt-fill me-2"></i>123 Z15 St, Central Thai Nguyen, VN<br>
+            <i class="bi bi-telephone-fill me-2"></i>+84 123 456 789<br>
+            <i class="bi bi-envelope-fill me-2"></i>contact@myrestaurant.com
+          </p>
+          <div class="social-icons">
+            <a href="#"><i class="bi bi-facebook"></i></a>
+            <a href="#"><i class="bi bi-instagram"></i></a>
+            <a href="#"><i class="bi bi-twitter"></i></a>
+            <a href="#"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4 border-top pt-3">
+        <p class="small">© 2025 My Restaurant. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"></script>
+</body>
+  <script>
+    // Sidebar toggle functionality
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const adminSidebar = document.getElementById('adminSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    if (sidebarToggle && adminSidebar && sidebarOverlay) {
+      sidebarToggle.addEventListener('click', function() {
+        adminSidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+      });
+
+      sidebarOverlay.addEventListener('click', function() {
+        adminSidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      });
+
+      // Close sidebar when clicking on a link
+      const sidebarLinks = adminSidebar.querySelectorAll('.sidebar-item');
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          adminSidebar.classList.remove('active');
+          sidebarOverlay.classList.remove('active');
+        });
+      });
+    }
+  </script>
+</html>

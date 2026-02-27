@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Order Details{% endblock %}
+
+{% block content %}
+<style>
+  :root{
+    --bg:#f6f2ea; --card:#fff; --brand:#1b7a57; --muted:#6b7280;
+    --shadow: 0 12px 30px rgba(0,0,0,.10);
+    --radius: 16px;
+  }
+  body{ background: var(--bg); }
+  .wrap{ max-width: 900px; margin: 26px auto; padding: 0 12px; }
+  .cardx{ background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; border:1px solid rgba(0,0,0,.06); }
+  .head{ background: var(--brand); color:#fff; padding:14px 18px; display:flex; align-items:center; gap:10px; }
+  .head h2{ margin:0; font-weight:900; letter-spacing:.2px; font-size:20px; }
+  .body{ padding:18px; }
+  .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width: 768px){ .grid{ grid-template-columns:1fr; } }
+  .kv p{ margin: 0 0 8px; }
+  .muted{ color: var(--muted); }
+  .badge{ padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px; }
+  .b-pending{ background:#fde68a; color:#7c5200; }
+  .b-completed{ background:#bbf7d0; color:#0f5132; }
+  .b-cancel{ background:#fecaca; color:#7f1d1d; }
+  .line{ height:1px; background: rgba(0,0,0,.08); margin: 14px 0; }
+  .item{ background:#f8fafc; border-radius:12px; padding:12px; border-left: 5px solid var(--brand); margin-bottom:10px; }
+  .total{ font-weight:900; font-size:20px; color: var(--brand); }
+  .note{ background:#e7f3ff; border-radius:12px; padding:12px; }
+  .pay{ background:#fff3cd; border-radius:12px; padding:12px; }
+</style>
+
+<div class="wrap">
+  <div class="cardx">
+    <div class="head">
+      <h2>📦 Order Details</h2>
+    </div>
+
+    <div class="body">
+      <div class="grid">
+        <div class="kv">
+          <p><b>Order ID:</b> {{ order.id }}</p>
+          <p><b>Customer Name:</b> {{ order.customer_name }}</p>
+          <p><b>Phone:</b> {{ order.customer_phone or '-' }}</p>
+        </div>
+        <div class="kv">
+          <p>
+            <b>Status:</b>
+            {% if order.status == 'Pending' %}
+              <span class="badge b-pending">Pending</span>
+            {% elif order.status == 'Completed' %}
+              <span class="badge b-completed">Completed</span>
+            {% elif order.status == 'Cancelled' %}
+              <span class="badge b-cancel">Cancelled</span>
+            {% else %}
+              <span class="badge">{{ order.status }}</span>
+            {% endif %}
+          </p>
+          <p><b>Table:</b> {{ order.table_reservation or 'No Reservation' }}</p>
+          <p><b>Order Time:</b> {{ order.created_at }}</p>
+        </div>
+      </div>
+
+      <div class="line"></div>
+
+      <h5 style="margin:0 0 10px;">Items:</h5>
+
+      {% if items_list and items_list|length > 0 %}
+        {% for it in items_list %}
+          <div class="item">
+            <div style="font-weight:900; font-size:16px;">{{ it.name }} (x{{ it.quantity }})</div>
+            <div class="muted">Số lượng: {{ it.quantity }} | Giá: {{ "{:,.0f}".format(it.price) }} VND | Tổng: {{ "{:,.0f}".format(it.price * it.quantity) }} VND</div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="item">
+          <div style="font-weight:900;">{{ order.items }}</div>
+          <div class="muted">Số lượng: {{ order.quantity }} | Tổng: {{ "{:,.0f}".format(order.price) }} VND</div>
+        </div>
+      {% endif %}
+
+      <div class="grid" style="margin-top: 10px;">
+        <div>
+          <p><b>Subtotal:</b> {{ "{:,.0f}".format(subtotal) }} VND</p>
+          <p><b>Service fee:</b> {{ "{:,.0f}".format(service_fee) }} VND</p>
+          <p><b>Total Price:</b> <span class="total">{{ "{:,.0f}".format(total) }} VND</span></p>
+        </div>
+        <div>
+          <p><b>Address:</b> {{ order.customer_address or '-' }}</p>
+        </div>
+      </div>
+
+      <div class="pay" style="margin-top: 12px;">
+        <b>Trạng thái thanh toán:</b>
+        {% if payment_status == 'Paid' %}
+          ✅ Đã thanh toán
+        {% else %}
+          ⏳ Chưa thanh toán
+        {% endif %}
+      </div>
+
+      <div class="note" style="margin-top: 12px;">
+        <b>Additional Notes:</b>
+        <div style="margin-top:6px;">{{ order.note or '—' }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Information | Vegetarian Restaurant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary-bg: #2c3e50;
+      --secondary-bg: #34495e;
+      --primary-color: #16a085;
+      --secondary-color: #e74c3c;
+      --light-bg: #ecf0f1;
+      --white: #ffffff;
+      --text-dark: #2c3e50;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--light-bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+      color: var(--white);
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .sidebar .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 20px;
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      transition: var(--transition);
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .nav-link i {
+      font-size: 1.3rem;
+    }
+
+    .user-info {
+      margin-top: auto;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: center;
+      border-top: none;
+    }
+
+    .user-info .user-details {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .user-info .user-icon {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      margin-bottom: 9px;
+      background: var(--white);
+      border-radius: 20%;
+      padding: 9px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-info .username {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      text-transform: capitalize;
+    }
+
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--secondary-color);
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 20px;
+      transition: var(--transition);
+    }
+
+    .logout-btn:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: 40px;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: var(--white);
+      padding: 35px;
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+      max-width: 550px;
+      width: 100%;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-bg);
+      text-align: center;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #f9f9f9;
+      transition: var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--primary-color);
+      background: var(--white);
+      box-shadow: 0 0 8px rgba(22, 160, 133, 0.2);
+      outline: none;
+    }
+
+    .service-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .service-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .service-option:hover {
+      background: #e9ecef;
+    }
+
+    .service-option input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #f9f9f9;
+      resize: vertical;
+      transition: var(--transition);
+    }
+
+    .form-group textarea:focus {
+      border-color: var(--primary-color);
+      background: var(--white);
+      box-shadow: 0 0 8px rgba(22, 160, 133, 0.2);
+      outline: none;
+    }
+
+    .order-summary {
+      background: var(--white);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+      border-left: 5px solid var(--primary-color);
+    }
+
+    .order-summary h2 {
+      color: var(--primary-bg);
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .summary-content {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--primary-color);
+    }
+
+    .summary-item .label {
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+
+    .summary-item .value {
+      text-align: right;
+      color: var(--secondary-bg);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 25px;
+      background: linear-gradient(45deg, var(--primary-color), #1abc9c);
+      color: var(--white);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(22, 160, 133, 0.4);
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      animation: slideIn 0.5s ease;
+    }
+
+    .alert-success {
+      background: #2ecc71;
+      color: var(--white);
+    }
+
+    .alert-danger {
+      background: #e74c3c;
+      color: var(--white);
+    }
+
+    .alert-info {
+      background: #3498db;
+      color: var(--white);
+      padding: 20px;
+    }
+
+    .alert i {
+      font-size: 1.2rem;
+    }
+
+    .alert-info p {
+      margin: 5px 0;
+    }
+
+    .alert-info img {
+      margin-top: 10px;
+      max-width: 150px;
+      border-radius: 5px;
+    }
+
+    #bank-details {
+      margin-top: 20px;
+      transition: opacity 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 80px;
+        padding: 15px;
+      }
+
+      .sidebar .logo,
+      .nav-link span,
+      .user-info .username,
+      .logout-btn span {
+        display: none;
+      }
+
+      .nav-link {
+        justify-content: center;
+        padding: 10px;
+      }
+
+      .user-info {
+        padding: 10px;
+        background: none;
+      }
+
+      .user-info .user-icon {
+        font-size: 2rem;
+        margin-bottom: 5px;
+      }
+
+      .logout-btn {
+        justify-content: center;
+        padding: 8px;
+        background: none;
+      }
+
+      .main-content {
+        margin-left: 80px;
+        padding: 20px;
+      }
+
+      .container {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="sidebar">
+    <div class="logo">Veggie</div>
+    <div class="nav-menu">
+      <a href="/" class="nav-link"><i class="bi bi-house-door"></i><span>Home</span></a>
+      <a href="/cart" class="nav-link"><i class="bi bi-cart"></i><span>Cart</span></a>
+      {% if session.get('role') == 'admin' %}
+      <a href="/admin/tables" class="nav-link"><i class="bi bi-table"></i><span>Manage Tables</span></a>
+      {% endif %}
+    </div>
+    <div class="user-info">
+      <div class="user-details">
+        <i class="bi bi-person-circle user-icon"></i>
+        <span class="username">{{ session['username'] }}</span>
+      </div>
+      <a href="/logout" class="logout-btn"><i class="bi bi-box-arrow-right"></i><span>Logout</span></a>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="container">
+      <header>
+        <h1>Order Information</h1>
+      </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert {{ 'alert-success' if category == 'success' else 'alert-danger' }}">
+              <i class="bi {{ 'bi-check-circle-fill' if category == 'success' else 'bi-exclamation-circle-fill' }}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="summary-content">
+          <div class="summary-item">
+            <span class="label">Customer:</span>
+            <span class="value">{{ order['customer_name']|default(session['username']) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Items:</span>
+            <span class="value">
+              {% if order %}
+                {% if order.items_text is defined and order.items_text %}
+                  {{ order.items_text }}
+                {% elif order.items_details is defined and order.items_details %}
+                  <ul style="padding-left: 16px; margin: 0; list-style: disc;">
+                    {% for it in order.items_details %}
+                      <li>
+                        {{ it.name }} (x{{ it.quantity }}){% if it.price is defined %} - {{ "{:,.0f}".format(it.price) }} VND{% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% elif order.items_json is defined and order.items_json %}
+                  {{ order.items_json }}
+                {% else %}
+                  N/A
+                {% endif %}
+              {% else %}
+                N/A
+              {% endif %}
+            </span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Quantity:</span>
+            <span class="value">{{ order['quantity']|default(0) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Total Price:</span>
+            <span class="value">
+              {% set computed_price = (order['price'] if order and order.get('price') is not none and order.get('price')|float > 0 else ( (order.get('subtotal')|float(0)) + (order.get('service_fees')|float(0)) ) ) %}
+              {{ "{:,.0f}".format(computed_price) }} VND
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('order_information') }}">
+        <div class="form-group">
+          <label for="customer_name">Full Name</label>
+          <input type="text" id="customer_name" name="customer_name" required placeholder="Enter your full name" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="Enter your email address" />
+        </div>
+        <div class="form-group">
+          <label for="phone_number">Phone Number</label>
+          <input type="text" id="phone_number" name="phone_number" required placeholder="Enter your phone number" />
+        </div>
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input type="text" id="address" name="address" required placeholder="Enter your address" />
+        </div>
+        <div class="form-group">
+          <label>Additional Services</label>
+          <div class="service-options">
+            <label class="service-option">
+              <input type="checkbox" name="services" value="Home Delivery" />
+              <span>Home Delivery (+50,000 VND)</span>
+            </label>
+            <label class="service-option">
+              <input type="checkbox" name="services" value="Express Service" />
+              <span>Express Service (+30,000 VND)</span>
+            </label>
+            <label class="service-option">
+              <input type="checkbox" name="services" value="Special Packaging" />
+              <span>Special Packaging (+20,000 VND)</span>
+            </label>
+            <label class="service-option">
+              <input type="checkbox" name="services" value="Chef's Special Request" />
+              <span>Chef's Special Request (+40,000 VND)</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="special_requests">Special Requests</label>
+          <textarea id="special_requests" name="special_requests" rows="3" placeholder="Any special dietary requirements, allergies, or requests..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="payment_method">Payment Method</label>
+          <select id="payment_method" name="payment_method" required>
+            <option value="" disabled selected>Select a payment method</option>
+            <option value="Pay at Restaurant">Pay at Restaurant</option>
+            <option value="Bank Payment">Bank Payment</option>
+          </select>
+          <div id="bank-details" style="display: none;">
+            <div class="alert alert-info">
+              <p><strong>Bank Transfer Details:</strong></p>
+              <p>Bank: <strong>MB Bank</strong></p>
+              <p>Account Number: <strong>0985790913</strong></p>
+              <p>Account Holder: <strong>Bùi Thu Hương</strong></p>
+              <p><em>Note: {{ session['username'] }} - Order</em></p>
+              <p><strong>Scan to Pay:</strong></p>
+              <img src="{{ url_for('static', filename='QR_Code.jpg') }}" alt="QR code" />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="table_reservation"><strong>Table Reservation</strong></label>
+          <select id="table_reservation" name="table_reservation" required>
+            <option value="" disabled selected>Select a table</option>
+            {% for table in available_tables %}
+              <option value="{{ table.name }}">{{ table.name }} - {{ table.type }} ({{ table.capacity }} people) {% if table.services %} - {{ table.services }}{% endif %}</option>
+            {% endfor %}
+            <option value="No Reservation">No Reservation</option>
+          </select>
+        </div>
+        <button type="submit" class="btn">Confirm Order</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const paymentSelect = document.getElementById("payment_method");
+    const bankDetails = document.getElementById("bank-details");
+
+    paymentSelect.addEventListener("change", function () {
+      bankDetails.style.display = this.value === "Bank Payment" ? "block" : "none";
+    });
+
+    // Calculate total with services
+    const serviceCheckboxes = document.querySelectorAll('input[name="services"]');
+    const basePrice = {{ ((order['price'] if order and order.get('price') is not none and order.get('price')|float > 0 else (order.get('subtotal')|float(0) + order.get('service_fees')|float(0))) )|default(0) }};
+    let totalPrice = basePrice;
+
+    function updateTotal() {
+      totalPrice = basePrice;
+      serviceCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+          const price = getServicePrice(checkbox.value);
+          totalPrice += price;
+        }
+      });
+      // Update display if there's a total display element
+      const totalDisplay = document.querySelector('.summary-item:last-child .value');
+      if (totalDisplay) {
+        totalDisplay.textContent = totalPrice.toLocaleString() + ' VND';
+      }
+    }
+
+    function getServicePrice(service) {
+      const prices = {
+        "Home Delivery": 50000,
+        "Express Service": 30000,
+        "Special Packaging": 20000,
+        "Chef's Special Request": 40000
+      };
+      return prices[service] || 0;
+    }
+
+    serviceCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', updateTotal);
+    });
+  </script>
+</body>
+</html>

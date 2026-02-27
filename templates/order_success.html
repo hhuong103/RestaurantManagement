@@ -1,0 +1,806 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed{% endblock %}
+
+{% block content %}
+<style>
+  /* =========================
+     Order Confirmed (Scoped UI)
+     ========================= */
+  .oc{
+    --bg0:#fbfaf8;
+    --bg1:#f3f5f4;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:rgba(15,23,42,.10);
+    --shadow: 0 24px 60px -18px rgba(15,23,42,.20);
+    --shadow2: 0 12px 30px -14px rgba(15,23,42,.14);
+    --radius: 22px;
+
+    --brand:#0e5c46;
+    --brand2:#0b4a38;
+    --success:#16a34a;
+    --warning:#f59e0b;
+    --danger:#ef4444;
+
+    --ring: 0 0 0 4px rgba(14,92,70,.15);
+
+    --qr-size: 340px;
+    --qr-pad: 24px;
+
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  }
+
+  @media (max-width: 520px){
+    .oc{ --qr-size: 280px; --qr-pad: 22px; }
+  }
+
+  .oc *{ box-sizing: border-box; }
+
+  .oc-page{
+    min-height: calc(100vh - 20px);
+    padding: 28px 16px 44px;
+    background:
+      radial-gradient(1200px 600px at 15% 10%, rgba(14,92,70,.10), transparent 60%),
+      radial-gradient(900px 520px at 85% 12%, rgba(245,158,11,.10), transparent 55%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    display: grid;
+    place-items: center;
+  }
+
+  .oc-wrap{ width: 100%; max-width: 1040px; }
+
+  .oc-head{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+
+  .oc-titlebox{
+    display:flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 280px;
+  }
+
+  .oc-check{
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(22,163,74,.12);
+    border: 1px solid rgba(22,163,74,.28);
+    display:grid;
+    place-items:center;
+    box-shadow: 0 14px 34px -18px rgba(22,163,74,.45);
+    flex: 0 0 auto;
+  }
+  .oc-check svg{ width: 30px; height: 30px; color: var(--success); }
+
+  .oc-hgroup h1{
+    margin:0;
+    font-size: clamp(1.65rem, 3.6vw, 2.35rem);
+    font-weight: 900;
+    letter-spacing: -0.6px;
+    line-height: 1.1;
+  }
+  .oc-hgroup p{
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: .98rem;
+  }
+
+  .oc-status{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.9);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 26px -18px rgba(15,23,42,.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-weight: 800;
+    color: var(--text);
+  }
+  .oc-dot{
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--warning);
+    box-shadow: 0 0 0 6px rgba(245,158,11,.16);
+  }
+  .oc-status span[aria-live]{ font-weight: 900; }
+
+  .oc-shell{
+    background: rgba(255,255,255,.78);
+    border: 1px solid rgba(255,255,255,.5);
+    border-radius: calc(var(--radius) + 8px);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .oc-topbar{
+    border-radius: calc(var(--radius) + 7px) calc(var(--radius) + 7px) 0 0;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    background:
+      linear-gradient(90deg, rgba(14,92,70,.10), rgba(14,92,70,.04) 40%, rgba(245,158,11,.06));
+  }
+
+  .oc-brand{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    font-weight: 950;
+    letter-spacing: -0.4px;
+    color: var(--brand);
+    font-size: 1.15rem;
+    text-transform: uppercase;
+  }
+  .oc-brand::before{
+    content:"";
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 0 0 6px rgba(14,92,70,.15);
+  }
+
+  .oc-topnote{ color: var(--muted); font-weight: 650; }
+
+  .oc-grid{
+    display:grid;
+    grid-template-columns: 1fr 430px;
+    gap: 18px;
+    padding: 18px;
+  }
+  @media (max-width: 980px){
+    .oc-grid{ grid-template-columns: 1fr; }
+  }
+
+  .oc-panel{
+    background: rgba(255,255,255,.92);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow2);
+    overflow: visible;
+  }
+
+  .oc-panel > .oc-ph:first-child{
+    border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+  }
+
+  .oc-ph{
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.70));
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .oc-ph h2{
+    margin:0;
+    font-size: 1.12rem;
+    font-weight: 950;
+    letter-spacing: -0.3px;
+  }
+  .oc-pb{ padding: 18px; }
+
+  .oc-steps{
+    display:flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .oc-step{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.9);
+    font-weight: 800;
+    color: var(--muted);
+    user-select: none;
+  }
+  .oc-step i{
+    width: 10px; height: 10px; border-radius: 999px;
+    background: rgba(100,116,139,.8);
+  }
+  .oc-step.active{
+    color: var(--brand);
+    border-color: rgba(14,92,70,.28);
+    background: rgba(14,92,70,.08);
+  }
+  .oc-step.active i{
+    background: var(--brand);
+    box-shadow: 0 0 0 6px rgba(14,92,70,.14);
+  }
+
+  .oc-info{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 12px 0 10px;
+  }
+  @media (max-width: 560px){
+    .oc-info{ grid-template-columns: 1fr; }
+  }
+  .oc-card{
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: rgba(255,255,255,.92);
+    padding: 14px 14px;
+  }
+  .oc-label{
+    color: var(--muted);
+    font-weight: 900;
+    font-size: .82rem;
+    letter-spacing: .2px;
+    margin-bottom: 8px;
+  }
+  .oc-value{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 950;
+    font-size: 1.08rem;
+  }
+  .oc-mono{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    letter-spacing: .2px;
+  }
+
+  .oc-btn{
+    appearance: none;
+    border: none;
+    cursor:pointer;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-weight: 950;
+    font-size: .95rem;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .oc-btn:focus-visible{ outline: none; box-shadow: var(--ring); }
+  .oc-btn-primary{
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand), var(--brand2));
+    box-shadow: 0 14px 34px -18px rgba(14,92,70,.55);
+  }
+  .oc-btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 18px 44px -20px rgba(14,92,70,.65); }
+  .oc-btn-ghost{
+    background: rgba(255,255,255,.9);
+    border: 1.5px solid rgba(14,92,70,.28);
+    color: var(--brand);
+  }
+  .oc-btn-ghost:hover{ background: rgba(14,92,70,.06); transform: translateY(-1px); }
+
+  .oc-mini{
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #fff;
+    font-weight: 950;
+  }
+
+  .oc-actions{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .oc-tip{
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px dashed rgba(14,92,70,.28);
+    background: rgba(14,92,70,.05);
+    color: var(--muted);
+    line-height: 1.5;
+    font-size: .92rem;
+  }
+  .oc-tip strong{ color: var(--text); }
+
+  .oc-fine{
+    margin-top: 12px;
+    color: var(--muted);
+    text-align: center;
+    font-size: .85rem;
+    line-height: 1.5;
+  }
+
+  .oc-qr{ text-align:center; }
+
+  .oc-qrwrap{
+    position: relative;
+    display: inline-block;
+    margin: 10px auto 6px;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .oc-pill{
+    position:absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(14,92,70,.96);
+    color:#fff;
+    font-weight: 950;
+    font-size: .82rem;
+    letter-spacing: .6px;
+    box-shadow: 0 12px 28px -18px rgba(14,92,70,.75);
+  }
+
+  .oc-qrcard{
+    background: #fff;
+    border-radius: 22px;
+    border: 1px solid rgba(15,23,42,.10);
+    box-shadow: 0 18px 48px -22px rgba(15,23,42,.30);
+    padding: var(--qr-pad);
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  #qr-svg{ display:none; }
+  #qr-svg svg{
+    width: var(--qr-size);
+    height: var(--qr-size);
+    display: block;
+    background: #fff;
+    shape-rendering: crispEdges;
+  }
+
+  #qr-image{
+    width: var(--qr-size);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    max-width: 100%;
+    display:block;
+    border-radius: 0 !important;
+    object-fit: contain;
+    background: #fff;
+    /* pixelated prevents the browser from blurring or anti-aliasing
+       when the PNG is scaled.  Avoids the "missing corner" artifact. */
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+
+  .oc-skel{
+    width: var(--qr-size);
+    height: var(--qr-size);
+    border-radius: 14px;
+    background: linear-gradient(90deg, #f2f4f7, #e9edf2, #f2f4f7);
+    background-size: 200% 100%;
+    animation: ocShimmer 1.2s infinite linear;
+  }
+  @keyframes ocShimmer{
+    0%{ background-position: 200% 0; }
+    100%{ background-position: -200% 0; }
+  }
+
+  .oc-toast{
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(15,23,42,.92);
+    color: #fff;
+    font-weight: 850;
+    font-size: .92rem;
+    box-shadow: 0 20px 60px -30px rgba(0,0,0,.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .oc-toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  @media print{
+    .oc-no-print{ display:none !important; }
+    .oc-page{ background:#fff !important; padding: 0 !important; }
+    .oc-shell{ box-shadow:none !important; border: 1px solid #ddd !important; }
+    .oc-qrcard{ padding: 40px !important; box-shadow:none !important; }
+    #qr-svg svg{ width: 420px !important; height: 420px !important; }
+    #qr-image{ width: 420px !important; height: auto !important; }
+    /* print also uses pixelated scaling */
+    #qr-image{ image-rendering: pixelated !important; }
+  }
+</style>
+
+<div class="oc">
+  <div class="oc-page">
+    <div class="oc-wrap">
+
+      <div class="oc-toast" id="oc-toast" role="status" aria-live="polite"></div>
+
+      <div class="oc-head oc-no-print">
+        <div class="oc-titlebox">
+          <div class="oc-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="oc-hgroup">
+            <h1>Order Confirmed</h1>
+            <p>Your order has been received. Please keep this page for check-in.</p>
+          </div>
+        </div>
+
+        <div class="oc-status" aria-label="Order status">
+          <span class="oc-dot" aria-hidden="true"></span>
+          <span id="status-text" aria-live="polite">Processing</span>
+        </div>
+      </div>
+
+      <div class="oc-shell">
+        <div class="oc-topbar">
+          <div class="oc-brand">VEGETARIAN RESTAURANT</div>
+          <div class="oc-topnote oc-no-print">Thank you for your order ✨</div>
+        </div>
+
+        <div class="oc-grid">
+          <!-- LEFT -->
+          <section class="oc-panel" aria-label="Order details">
+            <div class="oc-ph">
+              <h2>Order Details</h2>
+            </div>
+            <div class="oc-pb">
+
+              <div class="oc-steps oc-no-print" aria-label="Order progress">
+                <div class="oc-step active"><i></i>Received</div>
+                <div class="oc-step active"><i></i>Processing</div>
+                <div class="oc-step"><i></i>Ready</div>
+              </div>
+
+              <div class="oc-info">
+                <div class="oc-card">
+                  <div class="oc-label">Order ID</div>
+                  <div class="oc-value">
+                    <span id="order-id" class="oc-mono">{{ initial_order_id or '-' }}</span>
+                    <button class="oc-mini oc-no-print" id="btn-copy-id" type="button">Copy</button>
+                  </div>
+                </div>
+
+                <div class="oc-card">
+                  <div class="oc-label">Support</div>
+                  <div class="oc-value">
+                    <span>0865.787.333</span>
+                    <span style="font-size:.82rem; font-weight:950; color: var(--muted);">Hotline</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="oc-tip">
+                <strong>Tip:</strong> Increase screen brightness to maximum for faster scanning.<br>
+                For bank transfer payments, staff will verify using the transfer note.
+              </div>
+
+              <div class="oc-actions oc-no-print">
+                <button class="oc-btn oc-btn-primary" id="btn-fullscreen-qr" type="button">
+                  Open QR Full Size
+                </button>
+                <button class="oc-btn oc-btn-ghost" id="btn-print" type="button">
+                  Print Receipt
+                </button>
+                <a class="oc-btn oc-btn-ghost" href="{{ url_for('show_menu') }}">
+                  Back to Home
+                </a>
+              </div>
+
+              <div class="oc-fine">
+                Please show this QR code when you arrive.<br>
+                If scanning is difficult, open full size or zoom in.
+              </div>
+            </div>
+          </section>
+
+          <!-- RIGHT -->
+          <section class="oc-panel" aria-label="QR code">
+            <div class="oc-ph">
+              <h2>Scan to View Order</h2>
+              <div class="oc-no-print" style="color:var(--muted); font-weight:800; font-size:.9rem;">
+                Secure QR
+              </div>
+            </div>
+
+            <div class="oc-pb oc-qr">
+              <div class="oc-qrwrap">
+                <div class="oc-pill">SCAN ME</div>
+                <div class="oc-qrcard">
+                  <div id="qr-skeleton" class="oc-skel" aria-hidden="true"
+                       style="{% if initial_qr_image or initial_qr_svg_url or initial_qr_png_url %}display:none;{% endif %}"></div>
+
+                  <div id="qr-svg" aria-label="Your Order QR Code" style="display:none;"></div>
+
+                  <img
+                    id="qr-image"
+                    alt="Your Order QR Code"
+                    {% if initial_qr_svg_url %}
+                      src="{{ initial_qr_svg_url }}"
+                      style="display:block;"
+                    {% elif initial_qr_png_url %}
+                      src="{{ initial_qr_png_url }}"
+                      style="display:block;"
+                    {% elif initial_qr_image %}
+                      src="data:image/png;base64,{{ initial_qr_image }}"
+                      style="display:block;"
+                    {% else %}
+                      src=""
+                      style="display:none;"
+                    {% endif %}
+                  />
+
+                  <div id="qr-error" class="oc-fine" style="display:none; color: var(--danger); font-weight: 900;"></div>
+                </div>
+              </div>
+
+              <div class="oc-fine">
+                Keep phone steady • Avoid glare • Open full size if blurry
+              </div>
+
+              <div class="oc-actions oc-no-print" style="justify-content:center; margin-top: 10px;">
+                <button class="oc-btn oc-btn-ghost" id="btn-open-qr-secondary" type="button">
+                  Open Full Size
+                </button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const OC_INITIAL = {
+    orderId: {{ (initial_order_id or "")|tojson }},
+    qrToken: {{ (initial_qr_token or "")|tojson }},
+    qrSvgUrl: {{ (initial_qr_svg_url or "")|tojson }},
+    qrPngUrl: {{ (initial_qr_png_url or "")|tojson }},
+    qrFilename: {{ (initial_qr_filename or "")|tojson }},
+  };
+
+  function showToast(msg) {
+    const el = document.getElementById('oc-toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.__oc_toast_timer);
+    window.__oc_toast_timer = setTimeout(() => el.classList.remove('show'), 1300);
+  }
+
+  function setQrError(msg) {
+    const err = document.getElementById('qr-error');
+    if (!err) return;
+    err.textContent = msg;
+    err.style.display = "block";
+  }
+
+  function clearQrError() {
+    const err = document.getElementById('qr-error');
+    if (!err) return;
+    err.textContent = "";
+    err.style.display = "none";
+  }
+
+  function withBust(url) {
+    if (!url) return url;
+    const v = "v=" + Date.now();
+    return url + (url.includes("?") ? "&" : "?") + v;
+  }
+
+  function fullViewerUrl(token){
+    token = (token || "").trim();
+    if (!token) return "";
+    return `/qr/full/${encodeURIComponent(token)}`;
+  }
+
+  function setOpenFull(url) {
+    if (!url) return;
+    const btnFull = document.getElementById('btn-fullscreen-qr');
+    const btnFull2 = document.getElementById('btn-open-qr-secondary');
+    const openFull = () => window.open(withBust(url), "_blank", "noopener,noreferrer");
+    if (btnFull) btnFull.onclick = openFull;
+    if (btnFull2) btnFull2.onclick = openFull;
+  }
+
+  // Set Open Full Size ngay từ đầu: ƯU TIÊN viewer HTML (không mở ảnh trần)
+  (function initFullSizeButton(){
+    const token = (OC_INITIAL.qrToken || "").trim();
+    const viewer = fullViewerUrl(token);
+    if (viewer) {
+      setOpenFull(viewer);
+      return;
+    }
+
+    // fallback nếu chưa có token
+    const fallback =
+      OC_INITIAL.qrSvgUrl ||
+      OC_INITIAL.qrPngUrl ||
+      (OC_INITIAL.qrFilename ? ("/static/qr_codes/" + OC_INITIAL.qrFilename) : "");
+    if (fallback) setOpenFull(fallback);
+  })();
+
+  async function loadLatestQR() {
+    const img = document.getElementById('qr-image');
+    const svgHost = document.getElementById('qr-svg');
+    const skel = document.getElementById('qr-skeleton');
+    const statusText = document.getElementById('status-text');
+
+    const prevImgSrc = img ? (img.getAttribute("src") || "") : "";
+    const prevSvg = svgHost ? (svgHost.innerHTML || "") : "";
+    const hadSomething = (prevImgSrc && prevImgSrc.trim()) || (prevSvg && prevSvg.trim());
+
+    try {
+      clearQrError();
+      if (statusText) statusText.textContent = "Processing";
+      if (skel) skel.style.display = hadSomething ? "none" : "block";
+
+      const res = await fetch('/api/get_latest_order_qr', { cache: 'no-store' });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("API did not return JSON (maybe 500). Check server log.");
+      }
+
+      if (!res.ok || !data.success) {
+        throw new Error(data && data.message ? data.message : ("HTTP " + res.status));
+      }
+
+      const orderIdEl = document.getElementById('order-id');
+      if (orderIdEl) orderIdEl.textContent = data.order_id ?? "-";
+
+      const token = (data.qr_code || "").trim();
+      const svgUrl = data.qr_svg_url || (token ? ("/qr/render/" + token + ".svg") : "");
+      const pngUrl = data.qr_png_url || (token ? ("/qr/render/" + token + ".png") : "");
+
+      // Open full size: ƯU TIÊN viewer HTML
+      const viewer = fullViewerUrl(token);
+      if (viewer) {
+        setOpenFull(viewer);
+      } else {
+        const fallback = svgUrl || pngUrl || (data.qr_filename ? ("/static/qr_codes/" + data.qr_filename) : "");
+        if (fallback) setOpenFull(fallback);
+      }
+
+      // 1) inline SVG (optional)
+      const inlineSvg = (typeof data.qr_svg === "string") ? data.qr_svg : "";
+      if (svgHost && inlineSvg && inlineSvg.includes("<svg")) {
+        svgHost.innerHTML = inlineSvg;
+        svgHost.style.display = "block";
+        if (img) img.style.display = "none";
+        if (skel) skel.style.display = "none";
+        return;
+      }
+
+      // 2) IMG fallback: SVG URL -> PNG URL -> base64
+      if (svgHost) {
+        svgHost.innerHTML = "";
+        svgHost.style.display = "none";
+      }
+
+      function tryLoad(src) {
+        return new Promise((resolve) => {
+          if (!img || !src) return resolve(false);
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+      }
+
+      let ok = false;
+      if (svgUrl) ok = await tryLoad(withBust(svgUrl));
+      if (!ok && pngUrl) ok = await tryLoad(withBust(pngUrl));
+
+      const b64 = (typeof data.qr_image === "string") ? data.qr_image.trim() : "";
+      const b64Src = b64
+        ? (b64.startsWith("data:image") ? b64 : ("data:image/png;base64," + b64))
+        : "";
+
+      if (!ok && b64Src) ok = await tryLoad(b64Src);
+
+      if (ok) {
+        if (img) img.style.display = "block";
+        if (skel) skel.style.display = "none";
+        return;
+      }
+
+      throw new Error("QR sources are empty or failed to load.");
+
+    } catch (e) {
+      console.error(e);
+      if (skel) skel.style.display = "none";
+
+      if (svgHost && prevSvg && prevSvg.trim()) {
+        svgHost.innerHTML = prevSvg;
+        svgHost.style.display = "block";
+        if (img) img.style.display = "none";
+      } else if (img && prevImgSrc && prevImgSrc.trim()) {
+        img.setAttribute("src", prevImgSrc);
+        img.style.display = "block";
+        if (svgHost) {
+          svgHost.innerHTML = "";
+          svgHost.style.display = "none";
+        }
+      } else {
+        if (img) {
+          img.style.display = "none";
+          img.removeAttribute("src");
+        }
+        if (svgHost) {
+          svgHost.innerHTML = "";
+          svgHost.style.display = "none";
+        }
+      }
+
+      setQrError("Cannot load QR: " + (e && e.message ? e.message : String(e)));
+      showToast("Cannot load QR. Check login / server log.");
+      if (statusText) statusText.textContent = "Cannot load QR";
+    }
+  }
+
+  const btnPrint = document.getElementById('btn-print');
+  if (btnPrint) btnPrint.addEventListener('click', () => window.print());
+
+  const btnCopy = document.getElementById('btn-copy-id');
+  if (btnCopy) {
+    btnCopy.addEventListener('click', async () => {
+      const el = document.getElementById('order-id');
+      const id = el ? (el.textContent || "").trim() : "";
+      if (!id || id === "-") return;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(id);
+          showToast("Copied ✅");
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = id;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          showToast("Copied ✅");
+        }
+      } catch (err) {
+        alert("Copy failed. Order ID: " + id);
+      }
+    });
+  }
+
+  loadLatestQR();
+</script>
+{% endblock %}

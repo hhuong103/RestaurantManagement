@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Order Details{% endblock %}
+{% block content %}
+<div class="container my-4" style="max-width: 900px;">
+  <div class="card shadow-sm">
+    <div class="card-header bg-success text-white d-flex justify-content-between">
+      <b>Order Details</b>
+      <span class="badge bg-light text-dark">#{{ order.id }}</span>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <p class="mb-1"><b>Customer:</b> {{ order.customer_name }}</p>
+          <p class="mb-1"><b>Phone:</b> {{ order.customer_phone or "-" }}</p>
+          <p class="mb-1"><b>Address:</b> {{ order.customer_address or "-" }}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="mb-1"><b>Status:</b> {{ order.status }}</p>
+          <p class="mb-1"><b>Table:</b> {{ order.table_reservation or "No Reservation" }}</p>
+          <p class="mb-1"><b>Created:</b> {{ order.created_at }}</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <h6>Items</h6>
+      {% if items_list and items_list|length > 0 %}
+        <div class="list-group mb-3">
+          {% for it in items_list %}
+            <div class="list-group-item d-flex justify-content-between">
+              <div><b>{{ it.name }}</b> <span class="text-muted">(x{{ it.quantity }})</span></div>
+              <div>{{ "{:,.0f}".format((it.price|float) * (it.quantity|int)) }} VND</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-light">Items raw: {{ order.items }}</div>
+      {% endif %}
+
+      <div class="d-flex justify-content-between">
+        <h5 class="mb-0">Total</h5>
+        <h5 class="mb-0 text-success">{{ "{:,.0f}".format(order.price|float) }} VND</h5>
+      </div>
+
+      {% if order.note %}
+      <hr>
+      <div class="alert alert-info mb-0">{{ order.note }}</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

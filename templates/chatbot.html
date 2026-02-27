@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Chatbot Nhà Hàng{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg border-0 rounded-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                <div class="card-header bg-dark text-white text-center rounded-top-3">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-chat-dots-fill me-2"></i>
+                        Chatbot Chăm Sóc Khách Hàng - Nhà Hàng ABC
+                    </h4>
+                    <small class="text-light">Chúng tôi luôn sẵn sàng phục vụ bạn 24/7</small>
+                </div>
+                <div class="card-body p-4">
+                    <div id="chat-messages" class="mb-4" style="height: 500px; overflow-y: auto; background: #ffffff; border-radius: 10px; padding: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1);">
+                        <div class="message bot-message d-flex align-items-start mb-3">
+                            <img src="{{ url_for('static', filename='restaurant.jpg') }}" alt="Bot Avatar" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                            <div class="bubble bg-light text-dark p-3 rounded-3 shadow-sm" style="max-width: 70%; border-left: 4px solid #ef233c;">
+                                <strong class="text-primary">Chatbot:</strong> Xin chào quý khách! Tôi là chatbot của Nhà Hàng ABC. Chúng tôi phục vụ ẩm thực Việt Nam tinh tế với không gian sang trọng. Tôi có thể giúp bạn với thông tin về thực đơn, đặt bàn, hoặc bất kỳ câu hỏi nào. Bạn cần hỗ trợ gì hôm nay?
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="user-input" class="form-control form-control-lg rounded-pill border-0 shadow-sm" placeholder="Nhập tin nhắn của bạn..." style="padding-left: 20px; background: #f8f9fa;">
+                        <button class="btn btn-danger btn-lg rounded-pill ms-2 px-4 shadow" id="send-btn">
+                            <i class="bi bi-send-fill"></i> Gửi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#send-btn').click(function() {
+        sendMessage();
+    });
+
+    $('#user-input').keypress(function(e) {
+        if (e.which == 13) {
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
+        var message = $('#user-input').val().trim();
+        if (message === '') return;
+
+        // Hiển thị tin nhắn của user
+        $('#chat-messages').append(`
+            <div class="message user-message d-flex align-items-start justify-content-end mb-3">
+                <div class="bubble bg-primary text-white p-3 rounded-3 shadow-sm" style="max-width: 70%; border-right: 4px solid #ffffff;">
+                    <strong>Bạn:</strong> ${message}
+                </div>
+                <img src="{{ url_for('static', filename='restaurant.jpg') }}" alt="User Avatar" class="rounded-circle ms-3" style="width: 50px; height: 50px; object-fit: cover;">
+            </div>
+        `);
+        $('#user-input').val('');
+
+        // Gửi đến server
+        $.ajax({
+            url: '/chatbot/send',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ message: message }),
+            success: function(data) {
+                // Bot message
+                var botHtml = `
+                    <div class="message bot-message d-flex align-items-start mb-3">
+                        <img src="{{ url_for('static', filename='restaurant.jpg') }}" alt="Bot Avatar" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                        <div class="bubble bg-light text-dark p-3 rounded-3 shadow-sm" style="max-width: 70%; border-left: 4px solid #ef233c;">
+                            <strong class="text-primary">Chatbot:</strong> ${data.response}
+                        </div>
+                    </div>
+                `;
+                $('#chat-messages').append(botHtml);
+                // update cart badge if provided
+                if (data.cart_count !== undefined) {
+                    $('#cart-badge').text(data.cart_count);
+                }
+
+                // Quick-reply buttons (if provided)
+                if (data.buttons && data.buttons.length) {
+                    var btns = $('<div class="quick-replies d-flex gap-2 mb-3" style="flex-wrap:wrap;">');
+                    data.buttons.forEach(function(b){
+                        var button = $(`<button class="btn btn-outline-primary btn-sm quick-reply">${b.label}</button>`);
+                        button.attr('data-value', b.value);
+                        button.on('click', function(){
+                            sendQuick($(this).attr('data-value'));
+                            // disable after click
+                            btns.find('button').prop('disabled', true);
+                        });
+                        btns.append(button);
+                    });
+                    $('#chat-messages').append(btns);
+                }
+
+                // scroll
+                $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+            },
+            error: function() {
+                $('#chat-messages').append(`
+                    <div class="message bot-message d-flex align-items-start mb-3">
+                        <img src="{{ url_for('static', filename='restaurant.jpg') }}" alt="Bot Avatar" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                        <div class="bubble bg-danger text-white p-3 rounded-3 shadow-sm" style="max-width: 70%;">
+                            <strong>Chatbot:</strong> Xin lỗi, có lỗi xảy ra. Vui lòng thử lại.
+                        </div>
+                    </div>
+                `);
+            }
+        });
+
+        $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+    }
+
+    // Send a quick-reply (value is the numeric key from server mapping)
+    function sendQuick(value) {
+        if (!value) return;
+        // show user's selection
+        $('#chat-messages').append(`
+            <div class="message user-message d-flex align-items-start justify-content-end mb-3">
+                <div class="bubble bg-primary text-white p-3 rounded-3 shadow-sm" style="max-width: 70%; border-right: 4px solid #ffffff;">
+                    <strong>Bạn:</strong> ${value}
+                </div>
+                <img src="{{ url_for('static', filename='restaurant.jpg') }}" alt="User Avatar" class="rounded-circle ms-3" style="width: 50px; height: 50px; object-fit: cover;">
+            </div>
+        `);
+
+        // send numeric reply to server (server will consult session['chat_last_menu'])
+        $.ajax({
+            url: '/chatbot/send',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ message: value }),
+            success: function(data) {
+                var botHtml = `
+                    <div class="message bot-message d-flex align-items-start mb-3">
+                        <img src="{{ url_for('static', filename='restaurant.jpg') }}" alt="Bot Avatar" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                        <div class="bubble bg-light text-dark p-3 rounded-3 shadow-sm" style="max-width: 70%; border-left: 4px solid #ef233c;">
+                            <strong class="text-primary">Chatbot:</strong> ${data.response}
+                        </div>
+                    </div>
+                `;
+                $('#chat-messages').append(botHtml);
+                // update badge if provided
+                if (data.cart_count !== undefined) {
+                    $('#cart-badge').text(data.cart_count);
+                }
+                $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+            },
+            error: function() {
+                alert('Gửi nhanh thất bại. Vui lòng thử lại.');
+            }
+        });
+    }
+});
+</script>
+
+<style>
+.message {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bubble {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.5;
+}
+
+.card {
+    border: none !important;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #2b2d42 0%, #1a1a2e 100%) !important;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef233c 0%, #d90429 100%);
+    border: none;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #d90429 0%, #ef233c 100%);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit User
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+      <div class="card shadow-sm border-0 rounded-4">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white text-center rounded-top-4">
+          <h4 class="mb-0">Edit User</h4>
+        </div>
+        <!-- Body -->
+        <div class="card-body p-4 bg-light">
+          <form action="{{ url_for('update_user', user_id=user.id) }}" method="POST">
+            <!-- Username Field -->
+            <div class="form-floating mb-3">
+              <input 
+                type="text" 
+                class="form-control shadow-sm border-1" 
+                id="username" 
+                name="username" 
+                value="{{ user.username }}" 
+                placeholder="Username" 
+                required>
+              <label for="username" class="text-secondary">Username</label>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-floating mb-3">
+              <input 
+                type="password" 
+                class="form-control shadow-sm border-1" 
+                id="password" 
+                name="password" 
+                value="{{ user.password }}" 
+                placeholder="Password" 
+                required>
+              <label for="password" class="text-secondary">Password</label>
+            </div>
+
+            <!-- Role Field -->
+            <div class="form-floating mb-4">
+              <select 
+                class="form-select shadow-sm border-1" 
+                id="role" 
+                name="role" 
+                required>
+                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
+                <option value="customer" {% if user.role == "customer" %}selected{% endif %}>Customer</option>
+              </select>
+              <label for="role" class="text-secondary">Role</label>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-success shadow-sm px-4">
+                <i class="bi bi-save"></i> Save Changes
+              </button>
+              <a href="{{ url_for('user_list') }}" class="btn btn-secondary shadow-sm px-4">
+                <i class="bi bi-arrow-left"></i> Back to Users
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

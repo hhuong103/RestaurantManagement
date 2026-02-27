@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}
+  My Website
+{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    /* Reset và nền */
+    body {
+      background-image: url('{{ url_for('static', filename='bgr.jpg') }}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Tiêu đề */
+    .custom-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+      animation: slideIn 1s ease-out;
+    }
+
+    .custom-subtitle {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.6rem;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    /* About Section */
+    .about {
+      background: linear-gradient(135deg, #fffde7, #fff9c4);
+      padding: 60px 0;
+      animation: fadeInUp 1s ease-in-out;
+    }
+
+    .about h2 {
+      color: #8b5e3c;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(139, 94, 60, 0.3);
+    }
+
+    .about p {
+      color: #555;
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+
+    .about img {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .about img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .hero img {
+      transition: opacity 1s ease-in-out;
+    }
+
+    .hero .position-absolute {
+      background: linear-gradient(45deg, rgba(47, 127, 193, 0.7), rgba(139, 94, 60, 0.7));
+      padding: 40px;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    .hero h2 {
+      color: #fff;
+      font-size: 3rem;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero .btn-warning {
+      background: linear-gradient(45deg, #ffcc80, #ffa726);
+      border: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hero .btn-warning:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+    }
+
+    /* Features Section */
+    .features {
+      background: linear-gradient(135deg, #fff9c4, #fffde7);
+      padding: 60px 0;
+      animation: fadeInUp 1s ease-in-out;
+    }
+
+    .features h2 {
+      color: #8b5e3c;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(139, 94, 60, 0.3);
+    }
+
+    .feature-card {
+      background: #fff;
+      border: 2px solid #ffcc80;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 25px rgba(139, 94, 60, 0.3);
+    }
+
+    .feature-card img {
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover img {
+      transform: scale(1.1);
+    }
+
+    .feature-text {
+      color: #555;
+    }
+
+    /* Card sản phẩm */
+    .card {
+      border: 2px solid #8b5e3c;
+      background: linear-gradient(135deg, #fff, #fdfbf5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(139, 94, 60, 0.3);
+    }
+
+    .image-container {
+      height: 200px;
+      border-bottom: 2px solid #8b5e3c;
+      background: #f8f3eb;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .image-container img {
+      transition: transform 0.3s ease;
+    }
+
+    .image-container:hover img {
+      transform: scale(1.1);
+    }
+
+    .card-footer .btn {
+      background: linear-gradient(45deg, #2f7fc1, #5db0e0);
+      border: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .card-footer .btn:hover {
+      background: linear-gradient(45deg, #1f6ba8);
+      transform: scale(1.1);
+      box-shadow: 0 6px 15px rgba(47, 127, 193, 0.4);
+    }
+
+    /* Tooltip cho nút Add to Cart */
+    .card-footer .btn {
+      position: relative;
+    }
+
+    .card-footer .btn::before {
+      content: "Add to Cart!";
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2f7fc1;
+      color: white;
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .card-footer .btn:hover::before {
+      opacity: 1;
+      visibility: visible;
+      top: -30px;
+    }
+    .about p{
+     font-family: "Arial", sans-serif; /* ví dụ */
+    }
+
+
+    /* Keyframes cho hiệu ứng */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes ripple {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- About Section -->
+  <section class="about py-5">
+    <div class="container">
+      <h2 class="text-center mb-4 custom-title">FOOD BEST-SELLER</h2>
+      <div class="row align-items-center">
+        <div class="col-md-6 d-flex flex-column justify-content-center">
+          <h2 class="text-left mb-4 custom-subtitle">Pho</h2>
+          <p>
+            “Phở is Vietnam’s most celebrated dish, a steaming bowl of rice noodle soup that embodies the soul of Vietnamese cuisine.
+             Its heart lies in the broth, patiently simmered for hours from beef or chicken bones, infused with spices such as star anise, cinnamon, cloves, and charred ginger.
+             This slow cooking process creates a clear yet deeply flavorful base that is both aromatic and comforting. The broth is poured over soft rice noodles (bánh phở) and topped with slices of tender beef or chicken, depending on the variation.
+             Fresh herbs like basil, cilantro, and scallions, along with bean sprouts, lime wedges, and chili, are served on the side, allowing each diner to customize their bowl to taste. 
+             The result is a perfect harmony of savory, sweet, spicy, and fresh notes.
+          </p>
+          <div class="text-center my-4">
+            <img src="{{ url_for('static', filename='pho.jpg') }}" alt="Coffee Beans" class="img-fluid">
+          </div>
+        </div>
+        <div class="col-md-6 d-flex flex-column justify-content-center">
+          <h2 class="text-center mb-4 custom-subtitle">Banh Mi</h2>
+          <p>
+           "Vietnamese Bánh mì is more than just a sandwich.
+            It is a cultural symbol that tells the story of Vietnam’s history and creativity. 
+            Born from the French baguette introduced during colonial times, Bánh mì has been transformed by Vietnamese people into a unique street food that blends East and West. 
+            The bread is light, crisp, and airy, serving as the perfect vessel for a variety of fillings: savory grilled pork, roasted chicken, or cold cuts paired with pâté, mayonnaise, and a colorful mix of pickled carrots, daikon, cucumber, fresh cilantro, and chili. 
+            Each bite delivers a harmony of flavors crunchy, tangy, spicy, and rich that reflects the balance and freshness at the heart of Vietnamese cuisine. Today, Bánh mì is enjoyed not only on the bustling streets of Hanoi and Ho Chi Minh City but also celebrated worldwide as one of the most delicious and affordable street foods.
+           It represents Vietnam’s ability to adapt, innovate, and share its culinary traditions with the world.”
+          </p>
+          <div class="text-center my-4">
+            <img src="{{ url_for('static', filename='banhmi.jpg') }}" alt="Additional Coffee Image" class="img-fluid">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dynamic Hero Section -->
+  <section id="dynamic-hero" class="hero text-center text-white d-flex align-items-center justify-content-center">
+    <div class="container-fluid p-0">
+      <div class="position-relative">
+        <img src="{{ url_for('static', filename='bb.jpg') }}" alt="Coffee Shop" class="img-fluid w-100 h-100 object-cover">
+        <div class="position-absolute top-50 start-50 translate-middle">
+          <h2 class="display-4 fw-bold">50% OFF</h2>
+          <p class="lead">Sunday Special Offer</p>
+          <p class="fw-light">Only for Sunday from 1st April to 30th April 2025</p>
+          <form class="d-flex justify-content-center" method="GET" action="{{ url_for('search') }}">
+            <select class="form-select me-2" name="category" style="max-width: 220px;">
+              <option value="" {{ 'selected' if (selected_category|default('')) == '' else '' }}>All topics</option>
+              {% for c in categories|default([]) %}
+                <option value="{{ c }}" {{ 'selected' if (selected_category|default('')) == c else '' }}>{{ c }}</option>
+              {% endfor %}
+            </select>
+<input type="text" id="menuSearchInput" class="form-control me-2" name="search" placeholder="Search for delicious food..." style="max-width: 300px;">
+            <button class="btn btn-warning" type="submit"><i class="bi bi-search"></i> Search</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const heroSection = document.getElementById('dynamic-hero');
+    const images = [
+      "{{ url_for('static', filename='bbb.jpg') }}",
+      "{{ url_for('static', filename='bg.jpg') }}",
+      "{{ url_for('static', filename='br.jpg') }}"
+    ];
+    let index = 0;
+
+    setInterval(() => {
+      const img = heroSection.querySelector('img');
+      img.style.opacity = 0;
+      setTimeout(() => {
+        img.src = images[index];
+        img.style.opacity = 1;
+      }, 500);
+      index = (index + 1) % images.length;
+    }, 5000);
+  </script>
+
+  <!-- Features Section -->
+  <section class="features py-5">
+    <div class="container">
+      <h2 class="text-center mb-4 custom-title">Why Choose Us</h2>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card text-center">
+            <img src="{{ url_for('static', filename='delivery_icon.jpg') }}" alt="Fast Delivery" class="img-fluid">
+            <h5 class="feature-text fw-bold">Fastest Door Delivery</h5>
+            <p class="feature-text">Sit lorem ipsum et diam elitr est dolor sed duo.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card text-center">
+            <img src="{{ url_for('static', filename='vegetables.jpg') }}" alt="Fresh Coffee Beans" class="img-fluid">
+            <h5 class="feature-text fw-bold">Fresh Vegetables</h5>
+            <p class="feature-text">Guberg sea et et lorem dolor sed est sit invidunt.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card text-center">
+            <img src="{{ url_for('static', filename='quality_icon.jpg') }}" alt="Best Quality" class="img-fluid">
+            <h5 class="feature-text fw-bold">Best Quality Food</h5>
+            <p class="feature-text">Dolore tempor diam ipsum takima erat.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card text-center">
+            <img src="{{ url_for('static', filename='booking_icon.jpg') }}" alt="Online Booking" class="img-fluid">
+            <h5 class="feature-text fw-bold">Online Table Booking</h5>
+            <p class="feature-text">Lorem ipsum dolor sit amet invidual sample.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Cards -->
+  <div class="container py-5">
+    <div class="row">
+      {% for item in items %}
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="image-container">
+            {% if item.image %}
+              <img src="{{ url_for('static', filename='uploads/' ~ item.image) }}" 
+                   alt="{{ item.name }}" 
+                   class="img-fluid">
+            {% else %}
+              <span class="text-muted">No image</span>
+            {% endif %}
+          </div>
+          <div class="card-body text-center">
+            <h5 class="card-title">{{ item.name }}</h5>
+            <div class="mb-2">
+              {% set rating = [item.rating, 0] | max %}
+              {% set rating = [rating, 5] | min %}
+              {% set full_stars = rating | int %}
+              {% set has_half = (rating - full_stars) >= 0.5 %}
+              {% for i in range(full_stars) %}
+                <i class="bi bi-star-fill text-warning"></i>
+              {% endfor %}
+              {% if has_half %}
+                <i class="bi bi-star-half text-warning"></i>
+              {% endif %}
+              {% set empty_stars = 5 - full_stars - (1 if has_half else 0) %}
+              {% if empty_stars > 0 %}
+                {% for i in range(empty_stars) %}
+                  <i class="bi bi-star text-warning"></i>
+                {% endfor %}
+              {% endif %}
+              <span class="ms-1 text-muted">{{ "%.1f"|format(rating) }}</span>
+            </div>
+            <p class="card-text text-muted">{{ item.description or "No description available." }}</p>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center">
+            <strong style="color: #bc7138;">{{ "%.2f"|format(item.price) }} VND</strong>
+            <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST" style="display: inline;">
+              <input type="hidden" name="quantity" value="1"/>
+              <button type="submit" class="btn">
+                <i class="bi bi-cart-plus"></i> Add to Cart
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      $("#menuSearchInput").autocomplete({
+        source: function(request, response) {
+          $.ajax({
+            url: "/api/menu_suggestions",
+            dataType: "json",
+            success: function(data) {
+              // Filter suggestions based on input
+              var filtered = data.filter(function(item) {
+                return item.toLowerCase().includes(request.term.toLowerCase());
+              });
+              response(filtered.slice(0, 10)); // Limit to 10 suggestions
+            }
+          });
+        },
+        minLength: 1, // Start suggesting after 1 character
+        select: function(event, ui) {
+          // When user selects a suggestion, submit the form
+          $(this).val(ui.item.value);
+          $(this).closest('form').submit();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+{% endblock %}

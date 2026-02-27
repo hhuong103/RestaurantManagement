@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}
+  QR Code Diagnostic - Admin
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="text-center mb-4">🔍 QR Code Diagnostic Tool</h1>
+      
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Check Order QR Code Status</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="order-id">Enter Order ID:</label>
+            <input type="number" class="form-control" id="order-id" placeholder="e.g., 1, 2, 3...">
+            <button class="btn btn-primary mt-2" id="check-qr-btn">Check QR Code</button>
+          </div>
+          
+          <div id="result" style="display: none; margin-top: 20px;">
+            <div class="card">
+              <div class="card-body">
+                <h5>Order Information:</h5>
+                <table class="table table-sm">
+                  <tr>
+                    <td><strong>Order ID:</strong></td>
+                    <td id="result-order-id">-</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Customer Name:</strong></td>
+                    <td id="result-customer">-</td>
+                  </tr>
+                  <tr>
+                    <td><strong>QR Code Data (first 200 chars):</strong></td>
+                    <td><code id="result-qr-preview" style="word-break: break-all; font-size: 0.85rem;">-</code></td>
+                  </tr>
+                  <tr>
+                    <td><strong>QR Code Image Status:</strong></td>
+                    <td id="result-qr-image">-</td>
+                  </tr>
+                </table>
+                
+                <hr>
+                
+                <h5>Full QR Code Data:</h5>
+                <textarea class="form-control" rows="6" id="full-qr-data" readonly style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                
+                <hr>
+                
+                <h5>Try to Scan:</h5>
+                <p style="color: #666;">Copy the QR Code Data above and paste it in the QR Scanner to test:</p>
+                <div class="text-center">
+                  <button class="btn btn-success" id="copy-qr-btn">Copy QR Data</button>
+                  <a href="/scan_qr" class="btn btn-primary">Go to QR Scanner</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="error" class="alert alert-danger" style="display: none; margin-top: 20px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('check-qr-btn').addEventListener('click', function() {
+    const orderId = document.getElementById('order-id').value.trim();
+    
+    if (!orderId) {
+      showError('Vui lòng nhập Order ID');
+      return;
+    }
+    
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('error').style.display = 'none';
+    
+    fetch('/api/debug_qr/' + orderId)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('result-order-id').textContent = data.order_id;
+          document.getElementById('result-customer').textContent = data.customer_name;
+          document.getElementById('result-qr-preview').textContent = data.qr_code_data;
+          document.getElementById('result-qr-image').textContent = data.qr_code_image_status;
+          document.getElementById('full-qr-data').value = data.full_qr_code || 'N/A';
+          document.getElementById('result').style.display = 'block';
+          console.log('Full QR Code:', data.full_qr_code);
+        } else {
+          showError(data.message || 'Không tìm thấy order');
+        }
+      })
+      .catch(error => {
+        showError('Lỗi: ' + error.message);
+      });
+  });
+  
+  function showError(message) {
+    document.getElementById('error').textContent = message;
+    document.getElementById('error').style.display = 'block';
+  }
+  
+  document.getElementById('copy-qr-btn').addEventListener('click', function() {
+    const qrData = document.getElementById('full-qr-data').value;
+    if (qrData && qrData !== 'N/A') {
+      navigator.clipboard.writeText(qrData).then(() => {
+        alert('Đã sao chép QR Code Data!');
+      });
+    }
+  });
+  
+  // Allow Enter key to trigger check
+  document.getElementById('order-id').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById('check-qr-btn').click();
+    }
+  });
+</script>
+{% endblock %}

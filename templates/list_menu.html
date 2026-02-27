@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Admin | Menu Management
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-primary fw-bold">📝Menu Management</h1>
+    <!-- Route to create menu -->
+    <a href="{{ url_for('create_menu') }}" class="btn btn-success btn-lg shadow">
+      <i class="bi bi-plus-circle me-2"></i> Create New Menu
+    </a>
+  </div>
+
+  <!-- Search Bar -->
+  <form action="{{ url_for('search') }}" method="GET" class="mb-4">
+    <div class="input-group">
+      <input 
+        type="text" 
+        class="form-control shadow-sm" 
+        placeholder="Search menu items..." 
+        name="search"
+        aria-label="Search Menu Items"
+        list="search-suggestions" 
+      >
+      <button class="btn btn-outline-secondary shadow-sm" type="submit">
+        <i class="bi bi-search"></i> Search
+      </button>
+    </div>
+    <!-- Datalist chứa các gợi ý -->
+    <datalist id="search-suggestions">
+      <option value="Broccoli Cheese">
+      <option value="Broccoli and Mushroom Soup">
+      <option value="Chicken Rice">
+      <option value="Onion deep-fry">
+      <option value="Hamburger">
+      <option value="Pasta">
+      <option value="Pizza">
+      <option value="Sushi">
+      <option value="Spring rolls">
+      <option value="Ramen">
+      <option value="Spaghetti">
+      <option value="Vegetable">
+      <option value="Salad">
+      <option value="Avocado Toast">
+      <option value="Sliced Potatoes">
+    </datalist>
+  </form>
+
+
+  <!-- Menu Table -->
+  <div class="table-responsive shadow">
+    <table class="table table-striped table-hover align-middle">
+      <thead class="table-dark text-center">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Image</th>
+          <th scope="col">Name</th>
+          <th scope="col">Price</th>
+          <th scope="col">Rating</th>
+          <th scope="col">Description</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr class="text-center">
+          <th scope="row" class="fw-bold text-primary">{{ loop.index }}</th>
+
+          <!-- Image column with placeholder for missing images -->
+          <td>
+            {% if item.image %}
+              <img 
+                src="{{ url_for('static', filename='uploads/' ~ item.image) }}" 
+                alt="{{ item.name }}" 
+                class="rounded shadow-sm" 
+                style="width: 80px; height: auto;">
+            {% else %}
+              <span class="text-muted fst-italic">No image</span>
+            {% endif %}
+          </td>
+
+          <td class="fw-semibold text-dark">{{ item.name }}</td>
+          <td class="text-success fw-bold">{{ "%.2f"|format(item.price) }} VND</td>
+          <td>
+            {% set rating = [item.rating, 0] | max %}
+            {% set rating = [rating, 5] | min %}
+            {% set full_stars = rating | int %}
+            {% set has_half = (rating - full_stars) >= 0.5 %}
+            {% for i in range(full_stars) %}
+              <i class="bi bi-star-fill text-warning"></i>
+            {% endfor %}
+            {% if has_half %}
+              <i class="bi bi-star-half text-warning"></i>
+            {% endif %}
+            {% set empty_stars = 5 - full_stars - (1 if has_half else 0) %}
+            {% if empty_stars > 0 %}
+              {% for i in range(empty_stars) %}
+                <i class="bi bi-star text-warning"></i>
+              {% endfor %}
+            {% endif %}
+            <span class="ms-1">{{ "%.1f"|format(rating) }}</span>
+          </td>
+          <td class="text-wrap" style="max-width: 250px;">{{ item.description }}</td>
+          <td>
+            <!-- Edit Button -->
+            <a href="{{ url_for('edit_menu', item_id=item.id) }}" 
+               class="btn btn-warning btn-sm me-1 shadow-sm"
+               onclick="return confirm('Are you sure you want to edit this item?')">
+              <i class="bi bi-pencil-square"></i> Edit
+            </a>
+            <!-- Delete Button -->
+            <a href="{{ url_for('delete_menu', item_id=item.id) }}" 
+               class="btn btn-danger btn-sm shadow-sm"
+               onclick="return confirm('Are you sure you want to delete this item?')">
+              <i class="bi bi-trash"></i> Remove
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            <i class="bi bi-folder-x fs-3"></i>
+            <p class="mt-2">No menu items found.</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- Thêm script Autocomplete -->
+<script>
+  $(document).ready(function() {
+    const suggestions = [
+      "Cà phê sữa đá", "Cà phê đen", "Trà sữa", "Nước ép cam", "Sinh tố xoài",
+      "Bánh mì", "Phở chay", "Gỏi cuốn", "Cà phê", "Trà", "Nước ép", "Món chay",
+      "Giao hàng nhanh", "Cà phê chất lượng cao", "Ưu đãi 50%", "Dưới 50.000 VND",
+      "Cà phê sáng", "Đồ uống giải nhiệt"
+    ];
+    $("#search-input").autocomplete({
+      source: suggestions,
+      minLength: 1
+    });
+  });
+</script>
+</div>
+{% endblock %}

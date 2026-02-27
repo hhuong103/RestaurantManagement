@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Order QR Code Viewer
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">📊 Order QR Code Management</h1>
+  
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Search Order to View QR Code</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="order-id-search">Order ID:</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="order-id-search" placeholder="Enter Order ID">
+              <button class="btn btn-primary" id="search-btn">🔍 Search</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- QR Code Display -->
+  <div id="qr-display-container" style="display: none; margin-top: 30px;">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">📱 QR Code</h5>
+          </div>
+          <div class="card-body text-center">
+            <div id="qr-code-image" style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+              <img id="qr-img" style="max-width: 300px; height: auto;">
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-info" id="print-qr-btn">
+                🖨️ Print QR
+              </button>
+              <button type="button" class="btn btn-success" id="download-qr-btn">
+                ⬇️ Download
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0">📦 Order Details</h5>
+          </div>
+          <div class="card-body">
+            <table class="table table-sm">
+              <tr>
+                <th>Order ID:</th>
+                <td><strong id="detail-order-id">-</strong></td>
+              </tr>
+              <tr>
+                <th>Customer:</th>
+                <td id="detail-customer">-</td>
+              </tr>
+              <tr>
+                <th>Phone:</th>
+                <td id="detail-phone">-</td>
+              </tr>
+              <tr>
+                <th>Status:</th>
+                <td><span id="detail-status" class="badge">-</span></td>
+              </tr>
+              <tr>
+                <th>Table:</th>
+                <td id="detail-table">-</td>
+              </tr>
+              <tr>
+                <th>Total Price:</th>
+                <td id="detail-price" style="color: #28a745; font-weight: bold;">-</td>
+              </tr>
+              <tr>
+                <th>Created At:</th>
+                <td id="detail-created">-</td>
+              </tr>
+              <tr>
+                <th>QR Code Data:</th>
+                <td>
+                  <code id="detail-qr-code" style="background: #f5f5f5; padding: 5px; border-radius: 3px;">-</code>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Items List -->
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header bg-warning">
+            <h5 class="mb-0">📋 Items in Order</h5>
+          </div>
+          <div class="card-body">
+            <div id="items-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Error Message -->
+  <div id="error-container" class="alert alert-danger" style="display: none; margin-top: 20px;">
+    <strong>Error:</strong> <span id="error-message">-</span>
+  </div>
+</div>
+
+<!-- Print Stylesheet -->
+<style>
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #qr-code-image, #qr-code-image * {
+      visibility: visible;
+    }
+    #qr-code-image {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+    }
+  }
+</style>
+
+<script>
+  // Search for order
+  document.getElementById('search-btn').addEventListener('click', searchOrder);
+  document.getElementById('order-id-search').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') searchOrder();
+  });
+
+  function searchOrder() {
+    const orderId = document.getElementById('order-id-search').value.trim();
+    
+    if (!orderId || isNaN(orderId)) {
+      showError('Please enter a valid Order ID');
+      return;
+    }
+
+    // Fetch order details
+    fetch(`/api/get_order_details/${orderId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.order) {
+          displayOrderAndQR(data.order);
+        } else {
+          showError(data.message || 'Order not found');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showError('Error fetching order. Please try again.');
+      });
+  }
+
+  function displayOrderAndQR(order) {
+    // Hide error
+    document.getElementById('error-container').style.display = 'none';
+    
+    // Display QR image
+    if (order.qr_code_image) {
+      // If stored as base64
+      document.getElementById('qr-img').src = 'data:image/png;base64,' + order.qr_code_image;
+    } else if (order.qr_filename) {
+      // If stored as file
+      document.getElementById('qr-img').src = '/static/qr_codes/' + order.qr_filename;
+    } else {
+      document.getElementById('qr-img').src = '';
+      showError('QR code image not found');
+      return;
+    }
+
+    // Display order details
+    document.getElementById('detail-order-id').textContent = order.id;
+    document.getElementById('detail-customer').textContent = order.customer_name || '-';
+    document.getElementById('detail-phone').textContent = order.customer_phone || '-';
+    document.getElementById('detail-table').textContent = order.table_reservation || 'No Reservation';
+    document.getElementById('detail-price').textContent = formatPrice(order.price);
+    document.getElementById('detail-created').textContent = formatDateTime(order.created_at);
+    document.getElementById('detail-qr-code').textContent = order.qr_code || 'N/A';
+
+    // Status badge
+    const statusBadge = document.getElementById('detail-status');
+    statusBadge.textContent = order.status;
+    statusBadge.className = 'badge ' + getStatusColor(order.status);
+
+    // Display items
+    displayItems(order.items);
+
+    // Show container
+    document.getElementById('qr-display-container').style.display = 'block';
+    
+    // Scroll to display
+    document.getElementById('qr-display-container').scrollIntoView({ behavior: 'smooth' });
+
+    // Setup print and download buttons
+    setupQRActions(order.id, order.qr_filename);
+  }
+
+  function displayItems(itemsString) {
+    const itemsContainer = document.getElementById('items-list');
+    
+    try {
+      let itemsHtml = '<table class="table table-sm"><thead><tr><th>Item</th><th>Quantity</th><th>Price</th><th>Total</th></tr></thead><tbody>';
+      
+      if (itemsString.startsWith('[')) {
+        const items = JSON.parse(itemsString);
+        items.forEach(item => {
+          const total = item.quantity * item.price;
+          itemsHtml += `
+            <tr>
+              <td>${item.name}</td>
+              <td>${item.quantity}</td>
+              <td>${formatPrice(item.price)}</td>
+              <td><strong>${formatPrice(total)}</strong></td>
+            </tr>
+          `;
+        });
+      } else {
+        itemsHtml += `
+          <tr>
+            <td colspan="4">${itemsString}</td>
+          </tr>
+        `;
+      }
+      
+      itemsHtml += '</tbody></table>';
+      itemsContainer.innerHTML = itemsHtml;
+    } catch (e) {
+      document.getElementById('items-list').innerHTML = '<p>' + itemsString + '</p>';
+    }
+  }
+
+  function setupQRActions(orderId, qrFilename) {
+    // Print QR Code
+    document.getElementById('print-qr-btn').onclick = function() {
+      window.print();
+    };
+
+    // Download QR Code
+    document.getElementById('download-qr-btn').onclick = function() {
+      const img = document.getElementById('qr-img');
+      const link = document.createElement('a');
+      link.href = img.src;
+      link.download = `order_${orderId}_qr.png`;
+      link.click();
+    };
+  }
+
+  function showError(message) {
+    document.getElementById('error-message').textContent = message;
+    document.getElementById('error-container').style.display = 'block';
+    document.getElementById('qr-display-container').style.display = 'none';
+  }
+
+  function formatPrice(value) {
+    return (value || 0).toLocaleString('vi-VN') + ' VND';
+  }
+
+  function formatDateTime(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleString('vi-VN');
+  }
+
+  function getStatusColor(status) {
+    switch (status) {
+      case 'Pending': return 'bg-warning text-dark';
+      case 'Completed': return 'bg-success';
+      case 'Cancelled': return 'bg-danger';
+      case 'Approved': return 'bg-info';
+      default: return 'bg-secondary';
+    }
+  }
+</script>
+{% endblock %}

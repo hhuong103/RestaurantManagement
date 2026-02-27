@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+          <h4>Create New User</h4>
+        </div>
+        <div class="card-body">
+          <form action="{{ url_for('store_user') }}" method="POST">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input 
+                type="text" 
+                class="form-control shadow-sm" 
+                id="username" 
+                name="username" 
+                placeholder="Enter username" 
+                required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input 
+                type="password" 
+                class="form-control shadow-sm" 
+                id="password" 
+                name="password" 
+                placeholder="Enter password" 
+                required>
+            </div>
+            <div class="mb-3">
+              <label for="role" class="form-label">Role</label>
+              <select 
+                class="form-select shadow-sm" 
+                id="role" 
+                name="role" 
+                required>
+                <option value="" disabled selected>Select a role</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-success shadow-sm">
+                <i class="bi bi-person-plus"></i> Create User
+              </button>
+              <a href="{{ url_for('create_user_form') }}" class="btn btn-secondary shadow-sm">
+                <i class="bi bi-arrow-left"></i> Back to Users
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

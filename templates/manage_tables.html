@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Tables | Vegetarian Restaurant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-bg: #1a3c34; /* Màu xanh đậm sang trọng */
+      --secondary-bg: #2e4f47; /* Màu xanh nhạt hơn */
+      --primary-color: #17c0eb; /* Màu xanh dương nổi bật */
+      --secondary-color: #ff6b6b; /* Màu đỏ san hô */
+      --light-bg: #f4f7f6; /* Màu nền nhạt */
+      --white: #ffffff;
+      --text-dark: #1a3c34;
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--light-bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+      color: var(--white);
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .sidebar .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+      letter-spacing: 1px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 20px;
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      transition: var(--transition);
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
+    }
+
+    .nav-link i {
+      font-size: 1.4rem;
+    }
+
+    .user-info {
+      margin-top: auto;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: center;
+      border-top: none;
+    }
+
+    .user-info .user-details {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .user-info .user-icon {
+      font-size: 1.6rem;
+      color: var(--primary-color);
+      margin-bottom: 9px;
+      background: var(--white);
+      border-radius: 20%;
+      padding: 9px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-info .username {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--white);
+      text-transform: capitalize;
+    }
+
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--secondary-color);
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 20px;
+      transition: var(--transition);
+    }
+
+    .logout-btn:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: 40px;
+      flex-grow: 1;
+    }
+
+    .container {
+      background: var(--white);
+      padding: 35px;
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+      max-width: 1000px;
+      width: 100%;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary-bg);
+      text-align: center;
+      margin-bottom: 30px;
+      letter-spacing: 1.5px;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-create {
+      background: var(--primary-color);
+      color: var(--white);
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    .btn-create:hover {
+      background: #12a6cc;
+      transform: translateY(-2px);
+    }
+
+    .btn-edit {
+      background: #51cf66;
+      color: var(--white);
+      margin-right: 5px;
+    }
+
+    .btn-edit:hover {
+      background: #40c057;
+      transform: translateY(-2px);
+    }
+
+    .btn-remove {
+      background: var(--secondary-color);
+      color: var(--white);
+    }
+
+    .btn-remove:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background: var(--primary-bg);
+      color: var(--white);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+
+    td.actions {
+      text-align: center;
+    }
+
+    tr {
+      transition: var(--transition);
+    }
+
+    tr:hover {
+      background: #e9ecef;
+      transform: scale(1.01);
+    }
+
+    .status-available {
+      color: #2ecc71;
+      font-weight: 600;
+    }
+
+    .status-reserved {
+      color: #e74c3c;
+      font-weight: 600;
+    }
+
+    .modal-content {
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      background: var(--primary-bg);
+      color: var(--white);
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 25px;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+
+    .form-control {
+      border-radius: 8px;
+      border: 1px solid #ced4da;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 5px rgba(22, 160, 133, 0.3);
+    }
+
+    .modal-footer {
+      border-bottom-left-radius: 15px;
+      border-bottom-right-radius: 15px;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: #12a6cc;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      border: none;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 80px;
+        padding: 15px;
+      }
+
+      .sidebar .logo,
+      .nav-link span,
+      .user-info .username,
+      .logout-btn span {
+        display: none;
+      }
+
+      .nav-link {
+        justify-content: center;
+        padding: 10px;
+      }
+
+      .user-info {
+        padding: 10px;
+        background: none;
+      }
+
+      .user-info .user-icon {
+        font-size: 2rem;
+        margin-bottom: 5px;
+      }
+
+      .logout-btn {
+        justify-content: center;
+        padding: 8px;
+        background: none;
+      }
+
+      .main-content {
+        margin-left: 80px;
+        padding: 20px;
+      }
+
+      .container {
+        padding: 25px;
+      }
+
+      table, th, td {
+        font-size: 0.9rem;
+      }
+
+      .action-btn {
+        font-size: 0.8rem;
+        padding: 3px 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="sidebar">
+    <div class="logo">Veggie</div>
+    <div class="nav-menu">
+        <a href="/" class="nav-link"><i class="bi bi-house-door"></i> Home</a>
+        <a href="{{ url_for('show_menu_list') }}" class="nav-link"><i class="bi bi-list"></i> Menu</a>
+        <a href="{{ url_for('list_orders') }}" class="nav-link"><i class="bi bi-receipt"></i> Order</a>
+        <a href="/admin/tables" class="nav-link"><i class="bi bi-table"></i><span>Manage Tables</span></a>
+        <a href="{{ url_for('user_list') }}" class="nav-link active"><i class="bi bi-people"></i> Users</a>
+        <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    </div>
+    <div class="user-info">
+      <div class="user-details">
+        <i class="bi bi-person-circle user-icon"></i>
+        <span class="username">{{ session['username'] }}</span>
+      </div>
+      <a href="/logout" class="logout-btn"><i class="bi bi-box-arrow-right"></i><span>Logout</span></a>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="container">
+      <header>
+        <h1>Manage Table Reservations</h1>
+      </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert {{ 'alert-success' if category == 'success' else 'alert-danger' }}">
+              <i class="bi {{ 'bi-check-circle-fill' if category == 'success' else 'bi-exclamation-circle-fill' }}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Nút Create -->
+      <a href="#" class="action-btn btn-create" data-bs-toggle="modal" data-bs-target="#createTableModal">
+        <i class="bi bi-plus-circle"></i> Create New Table
+      </a>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Table Name</th>
+            <th>Type</th>
+            <th>Capacity</th>
+            <th>Services</th>
+            <th>Status</th>
+            <th>Reserved By</th>
+            <th>Reserved At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for table in tables %}
+            <tr>
+              <td>{{ table.name }}</td>
+              <td>{{ table.type or 'Standard' }}</td>
+              <td>{{ table.capacity or 2 }}</td>
+              <td>{{ table.services or '-' }}</td>
+              <td class="status-{{ 'available' if table.status == 'Available' else 'reserved' }}">{{ table.status }}</td>
+              <td>{{ table.reserved_by or '-' }}</td>
+              <td>{{ table.reserved_at or '-' }}</td>
+              <td class="actions">
+                <!-- Nút Edit -->
+                <a href="#" class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#editTableModal-{{ table.id }}"
+                   data-id="{{ table.id }}" data-name="{{ table.name }}" data-status="{{ table.status }}"
+                   data-reserved-by="{{ table.reserved_by }}" data-reserved-at="{{ table.reserved_at }}">
+                  <i class="bi bi-pencil"></i> Edit
+                </a>
+                <!-- Nút Remove -->
+                <a href="{{ url_for('delete_table', table_id=table.id) }}" class="action-btn btn-remove"
+                   onclick="return confirm('Are you sure you want to delete this table?');">
+                  <i class="bi bi-trash"></i> Remove
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Modal for Create Table -->
+      <div class="modal fade" id="createTableModal" tabindex="-1" aria-labelledby="createTableModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createTableModalLabel">Create New Table</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('create_table') }}" id="createTableForm">
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="createTableName" class="form-label">Table Name</label>
+                  <input type="text" class="form-control" id="createTableName" name="name" required placeholder="Enter table name">
+                </div>
+                <div class="mb-3">
+                  <label for="createTableType" class="form-label">Table Type</label>
+                  <select class="form-control" id="createTableType" name="type" required>
+                    <option value="Standard">Standard</option>
+                    <option value="VIP">VIP</option>
+                    <option value="Family">Family</option>
+                    <option value="Group">Group</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="createTableCapacity" class="form-label">Capacity</label>
+                  <select class="form-control" id="createTableCapacity" name="capacity" required>
+                    <option value="2">2 people</option>
+                    <option value="4">4 people</option>
+                    <option value="6">6 people</option>
+                    <option value="8">8 people</option>
+                    <option value="10">10+ people</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="createTableServices" class="form-label">Services</label>
+                  <textarea class="form-control" id="createTableServices" name="services" rows="3" placeholder="Enter services (e.g., Kids menu, High chair, etc.)"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="createTableStatus" class="form-label">Status</label>
+                  <select class="form-control" id="createTableStatus" name="status" required>
+                    <option value="Available">Available</option>
+                    <option value="Reserved">Reserved</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="createReservedBy" class="form-label">Reserved By</label>
+                  <input type="text" class="form-control" id="createReservedBy" name="reserved_by" placeholder="Enter reserved by">
+                </div>
+                <div class="mb-3">
+                  <label for="createReservedAt" class="form-label">Reserved At</label>
+                  <input type="datetime-local" class="form-control" id="createReservedAt" name="reserved_at">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Create Table</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal for Edit Table -->
+      {% for table in tables %}
+      <div class="modal fade" id="editTableModal-{{ table.id }}" tabindex="-1" aria-labelledby="editTableModalLabel-{{ table.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editTableModalLabel-{{ table.id }}">Edit Table</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('edit_table', table_id=table.id) }}" id="editTableForm-{{ table.id }}">
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="editTableName-{{ table.id }}" class="form-label">Table Name</label>
+                  <input type="text" class="form-control" id="editTableName-{{ table.id }}" name="name" required value="{{ table.name }}">
+                </div>
+                <div class="mb-3">
+                  <label for="editTableType-{{ table.id }}" class="form-label">Table Type</label>
+                  <select class="form-control" id="editTableType-{{ table.id }}" name="type" required>
+                    <option value="Standard" {{ 'selected' if table.type == 'Standard' else '' }}>Standard</option>
+                    <option value="VIP" {{ 'selected' if table.type == 'VIP' else '' }}>VIP</option>
+                    <option value="Family" {{ 'selected' if table.type == 'Family' else '' }}>Family</option>
+                    <option value="Group" {{ 'selected' if table.type == 'Group' else '' }}>Group</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="editTableCapacity-{{ table.id }}" class="form-label">Capacity</label>
+                  <select class="form-control" id="editTableCapacity-{{ table.id }}" name="capacity" required>
+                    <option value="2" {{ 'selected' if table.capacity == 2 else '' }}>2 people</option>
+                    <option value="4" {{ 'selected' if table.capacity == 4 else '' }}>4 people</option>
+                    <option value="6" {{ 'selected' if table.capacity == 6 else '' }}>6 people</option>
+                    <option value="8" {{ 'selected' if table.capacity == 8 else '' }}>8 people</option>
+                    <option value="10" {{ 'selected' if table.capacity == 10 else '' }}>10+ people</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="editTableServices-{{ table.id }}" class="form-label">Services</label>
+                  <textarea class="form-control" id="editTableServices-{{ table.id }}" name="services" rows="3" placeholder="Enter services (e.g., Kids menu, High chair, etc.)">{{ table.services if table.services else '' }}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="editTableStatus-{{ table.id }}" class="form-label">Status</label>
+                  <select class="form-control" id="editTableStatus-{{ table.id }}" name="status" required>
+                    <option value="Available" {{ 'selected' if table.status == 'Available' else '' }}>Available</option>
+                    <option value="Reserved" {{ 'selected' if table.status == 'Reserved' else '' }}>Reserved</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="editReservedBy-{{ table.id }}" class="form-label">Reserved By</label>
+                  <input type="text" class="form-control" id="editReservedBy-{{ table.id }}" name="reserved_by" value="{{ table.reserved_by if table.reserved_by else '' }}" placeholder="Enter reserved by">
+                </div>
+                <div class="mb-3">
+                  <label for="editReservedAt-{{ table.id }}" class="form-label">Reserved At</label>
+                  <input type="datetime-local" class="form-control" id="editReservedAt-{{ table.id }}" name="reserved_at" value="{{ table.reserved_at|datetimeformat if table.reserved_at else '' }}">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- JavaScript để xử lý logic modal -->
+  <script>
+    // Hàm để bật/tắt các trường Reserved By và Reserved At dựa trên Status
+    function toggleReservedFields(modalId, statusFieldId, reservedByFieldId, reservedAtFieldId) {
+      const statusField = document.getElementById(statusFieldId);
+      const reservedByField = document.getElementById(reservedByFieldId);
+      const reservedAtField = document.getElementById(reservedAtFieldId);
+
+      function updateFields() {
+        if (statusField.value === "Available") {
+          reservedByField.disabled = true;
+          reservedAtField.disabled = true;
+          reservedByField.value = "";
+          reservedAtField.value = "";
+        } else {
+          reservedByField.disabled = false;
+          reservedAtField.disabled = false;
+        }
+      }
+
+      statusField.addEventListener("change", updateFields);
+      updateFields(); // Gọi ngay khi modal mở
+    }
+
+    // Áp dụng logic cho modal Create
+    toggleReservedFields(
+      "createTableModal",
+      "createTableStatus",
+      "createReservedBy",
+      "createReservedAt"
+    );
+
+    // Áp dụng logic cho từng modal Edit
+    {% for table in tables %}
+      toggleReservedFields(
+        "editTableModal-{{ table.id }}",
+        "editTableStatus-{{ table.id }}",
+        "editReservedBy-{{ table.id }}",
+        "editReservedAt-{{ table.id }}"
+      );
+    {% endfor %}
+  </script>
+</body>
+</html>
