@@ -115,7 +115,12 @@ class MenuController:
         try:
             categories = self.model.get_distinct_categories()
         except Exception:
-            categories = self._unique_categories(self.model.get_menu())
+            categories = self._unique_categories(menu_items)
+
+        # include placeholder for items that lack a category
+        if any(not ( (it.get("category") or "").strip() ) for it in menu_items):
+            if "Uncategorized" not in categories:
+                categories.append("Uncategorized")
 
         return self._render_with_session(
             "menu.html",
@@ -225,7 +230,12 @@ class MenuController:
         try:
             categories = self.model.get_distinct_categories()
         except Exception:
-            categories = self._unique_categories(self.model.get_menu())
+            categories = self._unique_categories(menu_items or [])
+
+        # Include placeholder for items without category
+        if any(not ((it.get("category") or "").strip()) for it in menu_items):
+            if "Uncategorized" not in categories:
+                categories.append("Uncategorized")
 
         return self._render_with_session(
             "search_menu.html",

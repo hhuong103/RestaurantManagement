@@ -198,6 +198,133 @@
       transform: translateX(-50%);
       background: #2f7fc1;
       color: white;
+    }
+
+    /* Filter & Search Section */
+    .filter-section {
+      background: linear-gradient(135deg, rgba(255, 205, 128, 0.2), rgba(255, 249, 196, 0.3));
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .filter-title {
+      color: #8b5e3c;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .filter-group {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .filter-group label {
+      display: block;
+      color: #555;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .filter-group input,
+    .filter-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #ffcc80;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #fff;
+      transition: all 0.3s ease;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+      outline: none;
+      border-color: #ffa726;
+      box-shadow: 0 0 8px rgba(255, 167, 38, 0.3);
+    }
+
+    .filter-btn {
+      background: linear-gradient(45deg, #2f7fc1, #5db0e0);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      align-self: flex-end;
+    }
+
+    .filter-btn:hover {
+      background: linear-gradient(45deg, #1f6ba8, #4a9dcc);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(47, 127, 193, 0.3);
+    }
+
+    .clear-filter-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      align-self: flex-end;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .clear-filter-btn:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+      color: white;
+    }
+
+    .category-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .category-tag {
+      background: white;
+      border: 2px solid #ffcc80;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      color: #8b5e3c;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .category-tag:hover {
+      background: #ffcc80;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .category-tag.active {
+      background: #ffa726;
+      border-color: #ffa726;
+      color: white;
       padding: 5px 10px;
       font-size: 0.9rem;
       opacity: 0;
@@ -283,16 +410,7 @@
           <h2 class="display-4 fw-bold">50% OFF</h2>
           <p class="lead">Sunday Special Offer</p>
           <p class="fw-light">Only for Sunday from 1st April to 30th April 2025</p>
-          <form class="d-flex justify-content-center" method="GET" action="{{ url_for('search') }}">
-            <select class="form-select me-2" name="category" style="max-width: 220px;">
-              <option value="" {{ 'selected' if (selected_category|default('')) == '' else '' }}>All topics</option>
-              {% for c in categories|default([]) %}
-                <option value="{{ c }}" {{ 'selected' if (selected_category|default('')) == c else '' }}>{{ c }}</option>
-              {% endfor %}
-            </select>
-<input type="text" id="menuSearchInput" class="form-control me-2" name="search" placeholder="Search for delicious food..." style="max-width: 300px;">
-            <button class="btn btn-warning" type="submit"><i class="bi bi-search"></i> Search</button>
-          </form>
+          <!-- search form removed -->
         </div>
       </div>
     </div>
@@ -355,84 +473,66 @@
     </div>
   </section>
 
+
   <!-- Product Cards -->
   <div class="container py-5">
     <div class="row">
       {% for item in items %}
-      <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100">
-          <div class="image-container">
-            {% if item.image %}
-              <img src="{{ url_for('static', filename='uploads/' ~ item.image) }}" 
-                   alt="{{ item.name }}" 
-                   class="img-fluid">
-            {% else %}
-              <span class="text-muted">No image</span>
-            {% endif %}
-          </div>
-          <div class="card-body text-center">
-            <h5 class="card-title">{{ item.name }}</h5>
-            <div class="mb-2">
-              {% set rating = [item.rating, 0] | max %}
-              {% set rating = [rating, 5] | min %}
-              {% set full_stars = rating | int %}
-              {% set has_half = (rating - full_stars) >= 0.5 %}
-              {% for i in range(full_stars) %}
-                <i class="bi bi-star-fill text-warning"></i>
-              {% endfor %}
-              {% if has_half %}
-                <i class="bi bi-star-half text-warning"></i>
+        <div class="col-md-4 mb-4">
+          <div class="card shadow-sm h-100">
+            <div class="image-container">
+              {% if item.image %}
+                <img src="{{ url_for('static', filename='uploads/' ~ item.image) }}"
+                     alt="{{ item.name }}"
+                     class="img-fluid">
+              {% else %}
+                <span class="text-muted">No image</span>
               {% endif %}
-              {% set empty_stars = 5 - full_stars - (1 if has_half else 0) %}
-              {% if empty_stars > 0 %}
-                {% for i in range(empty_stars) %}
-                  <i class="bi bi-star text-warning"></i>
-                {% endfor %}
-              {% endif %}
-              <span class="ms-1 text-muted">{{ "%.1f"|format(rating) }}</span>
             </div>
-            <p class="card-text text-muted">{{ item.description or "No description available." }}</p>
-          </div>
-          <div class="card-footer d-flex justify-content-between align-items-center">
-            <strong style="color: #bc7138;">{{ "%.2f"|format(item.price) }} VND</strong>
-            <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST" style="display: inline;">
-              <input type="hidden" name="quantity" value="1"/>
-              <button type="submit" class="btn">
-                <i class="bi bi-cart-plus"></i> Add to Cart
-              </button>
-            </form>
+            <div class="card-body text-center">
+              <h5 class="card-title">
+                {{ item.name }}
+                {% if item.category %}
+                  <span class="badge bg-secondary ms-1">{{ item.category }}</span>
+                {% endif %}
+              </h5>
+              <div class="mb-2">
+                {% set rating = [item.rating, 0] | max %}
+                {% set rating = [rating, 5] | min %}
+                {% set full_stars = rating | int %}
+                {% set has_half = (rating - full_stars) >= 0.5 %}
+                {% for i in range(full_stars) %}
+                  <i class="bi bi-star-fill text-warning"></i>
+                {% endfor %}
+                {% if has_half %}
+                  <i class="bi bi-star-half text-warning"></i>
+                {% endif %}
+                {% set empty_stars = 5 - full_stars - (1 if has_half else 0) %}
+                {% if empty_stars > 0 %}
+                  {% for i in range(empty_stars) %}
+                    <i class="bi bi-star text-warning"></i>
+                  {% endfor %}
+                {% endif %}
+                <span class="ms-1 text-muted">{{ "%.1f"|format(rating) }}</span>
+              </div>
+              <p class="card-text text-muted">{{ item.description or "No description available." }}</p>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+              <strong style="color: #bc7138;">{{ "%.2f"|format(item.price) }} VND</strong>
+              <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST" style="display: inline;">
+                <input type="hidden" name="quantity" value="1"/>
+                <button type="submit" class="btn">
+                  <i class="bi bi-cart-plus"></i> Add to Cart
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
       {% endfor %}
     </div>
   </div>
 
-  <script>
-    $(document).ready(function() {
-      $("#menuSearchInput").autocomplete({
-        source: function(request, response) {
-          $.ajax({
-            url: "/api/menu_suggestions",
-            dataType: "json",
-            success: function(data) {
-              // Filter suggestions based on input
-              var filtered = data.filter(function(item) {
-                return item.toLowerCase().includes(request.term.toLowerCase());
-              });
-              response(filtered.slice(0, 10)); // Limit to 10 suggestions
-            }
-          });
-        },
-        minLength: 1, // Start suggesting after 1 character
-        select: function(event, ui) {
-          // When user selects a suggestion, submit the form
-          $(this).val(ui.item.value);
-          $(this).closest('form').submit();
-        }
-      });
-    });
-  </script>
+
 </body>
 </html>
 {% endblock %}

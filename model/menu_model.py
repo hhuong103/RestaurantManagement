@@ -277,15 +277,4 @@ class MenuModel:
         return [r[0] for r in rows]
 
 
-    def get_order_by_qr_token(self, token):
-      try:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM orders WHERE qr_code = ? LIMIT 1", (token,))
-        return cur.fetchone()
-      except sqlite3.Error as e:
-        print("Error get_order_by_qr_token:", e)
-        return None
-      finally:
-        conn.close()
+    

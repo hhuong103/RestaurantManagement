@@ -1,97 +1,775 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurant Menu</title>
 
-{% block title %}
-  Restaurant Menu
-{% endblock %}
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-{% block content %}
-  <div class="container my-4">
-    <!-- Page Title -->
-    <h1 class="mb-4 text-center text-primary">Our Menu</h1>
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Search Form -->
-    <form class="mb-4" method="GET" action="{{ url_for('search') }}">
-      <div class="input-group">
-        <input 
-          type="text" 
-          class="form-control shadow-sm" 
-          id="searchInput"
-          name="search" 
-          placeholder="Search by name..."
-          aria-label="Search"
-        >
-        <button class="btn btn-primary shadow-sm" type="submit">
-          <i class="fas fa-search"></i> Search
-        </button>
+  <!-- jQuery UI (Autocomplete) -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+  <style>
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0f1b33;
+      --card:#0f172a;
+      --card2:#0b1220;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:rgba(255,255,255,.10);
+      --brand:#22c55e;
+      --brand2:#3b82f6;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
+      --shadow-soft: 0 12px 28px rgba(0,0,0,.22);
+      --radius: 18px;
+    }
+
+    body{
+      background: radial-gradient(1200px 600px at 15% 10%, rgba(59,130,246,.22), transparent 60%),
+                  radial-gradient(900px 500px at 85% 15%, rgba(34,197,94,.18), transparent 55%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1));
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Navbar */
+    .navbar{
+      backdrop-filter: blur(10px);
+      background: rgba(15, 23, 42, .70) !important;
+      border-bottom: 1px solid var(--border);
+    }
+    .navbar .nav-link{
+      color: rgba(229,231,235,.9) !important;
+      font-weight: 600;
+    }
+    .navbar .nav-link:hover{ color:#fff !important; }
+    .navbar-brand{
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
+    .brand-dot{
+      width: 10px; height: 10px; border-radius: 99px;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      display:inline-block; margin-left:8px;
+      box-shadow: 0 0 0 4px rgba(34,197,94,.15);
+    }
+    .nav-cta{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+    }
+    .nav-cta:hover{ background: rgba(255,255,255,.10); color:#fff; }
+
+    /* Hero */
+    .hero{
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(700px 280px at 30% 15%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(700px 280px at 70% 25%, rgba(34,197,94,.18), transparent 60%),
+        rgba(15, 23, 42, .55);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: linear-gradient(135deg, rgba(34,197,94,.25), rgba(59,130,246,.25));
+      filter: blur(26px);
+      opacity:.35;
+      z-index:0;
+    }
+    .hero > *{ position:relative; z-index:1; }
+
+    .hero-title{
+      font-weight: 900;
+      letter-spacing: .2px;
+      line-height: 1.05;
+    }
+    .hero-sub{
+      color: rgba(229,231,235,.80);
+      max-width: 60ch;
+    }
+
+    /* Search */
+    .search-wrap{
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .form-control, .form-select{
+      background: rgba(11, 18, 32, .55) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+    }
+    .form-control::placeholder{ color: rgba(229,231,235,.55); }
+    .btn-brand{
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      border: none;
+      color: #06101f;
+      font-weight: 800;
+      box-shadow: 0 10px 22px rgba(34,197,94,.18);
+    }
+    .btn-brand:hover{ filter: brightness(1.03); transform: translateY(-1px); }
+    .btn-ghost{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+    }
+    .btn-ghost:hover{ background: rgba(255,255,255,.10); color:#fff; }
+
+    /* Category pills */
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: rgba(229,231,235,.92);
+      text-decoration:none;
+      font-weight: 700;
+      transition: all .18s ease;
+      white-space: nowrap;
+    }
+    .pill:hover{
+      background: rgba(255,255,255,.10);
+      transform: translateY(-1px);
+      color:#fff;
+    }
+    .pill.active{
+      background: linear-gradient(135deg, rgba(34,197,94,.22), rgba(59,130,246,.22));
+      border-color: rgba(255,255,255,.18);
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+
+    /* Cards */
+    .menu-card{
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(15, 23, 42, .65);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease;
+      height: 100%;
+    }
+    .menu-card:hover{
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+    .menu-img{
+      height: 210px;
+      object-fit: cover;
+      width: 100%;
+      display:block;
+      background: rgba(255,255,255,.05);
+    }
+    .menu-body{
+      padding: 16px 16px 12px;
+    }
+    .menu-title{
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: .2px;
+      font-size: 1.08rem;
+    }
+    .menu-desc{
+      color: rgba(229,231,235,.75);
+      margin-top: 8px;
+      min-height: 42px;
+    }
+    .badge-cat{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.08);
+      color: rgba(229,231,235,.92);
+      font-weight: 800;
+    }
+    .menu-footer{
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .price{
+      font-weight: 900;
+      font-size: 1.05rem;
+      background: linear-gradient(135deg, rgba(34,197,94,.25), rgba(59,130,246,.25));
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+
+    /* Footer */
+    footer{
+      border-top: 1px solid var(--border);
+      background: rgba(15, 23, 42, .55);
+    }
+    .footer-muted{ color: rgba(229,231,235,.65); }
+
+    /* jQuery UI autocomplete dropdown look */
+    .ui-autocomplete{
+      max-height: 260px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12) !important;
+      background: rgba(11, 18, 32, .92);
+      box-shadow: 0 22px 60px rgba(0,0,0,.40);
+      padding: 8px;
+    }
+    .ui-menu-item-wrapper{
+      border-radius: 10px;
+      padding: 10px 12px !important;
+      color: rgba(229,231,235,.92);
+    }
+    .ui-state-active{
+      border: none !important;
+      background: rgba(255,255,255,.10) !important;
+      color: #fff !important;
+      margin: 0 !important;
+    }
+
+    /* =====================================================
+   WHITE + GLASS + GREEN ACCENT (Luxury Light Theme)
+   Paste at the VERY END of your <style>
+   ===================================================== */
+:root{
+  --bg0:#f6fbf7;
+  --bg1:#ffffff;
+
+  --card:#ffffff;
+  --card2: rgba(255,255,255,.72);
+
+  --text:#0f172a;
+  --muted:#5b6475;
+  --border: rgba(15,23,42,.10);
+
+  --brand:#16a34a;     /* green accent */
+  --brand2:#22c55e;    /* brighter green */
+  --accent:#0ea5e9;    /* optional subtle blue */
+
+  --shadow: 0 18px 55px rgba(15,23,42,.10);
+  --shadow-soft: 0 12px 30px rgba(15,23,42,.08);
+  --radius: 18px;
+}
+
+body{
+  background:
+    radial-gradient(1100px 600px at 15% 10%, rgba(34,197,94,.14), transparent 60%),
+    radial-gradient(1000px 520px at 85% 15%, rgba(14,165,233,.10), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1)) !important;
+  color: var(--text) !important;
+}
+
+/* ===== NAVBAR: glass white ===== */
+.navbar{
+  background: rgba(255,255,255,.72) !important;
+  border-bottom: 1px solid var(--border) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 12px 26px rgba(15,23,42,.06);
+}
+
+.navbar .navbar-brand.text-white,
+.navbar .navbar-brand{
+  color: var(--text) !important;
+  font-weight: 900;
+}
+.navbar .navbar-brand i{
+  color: var(--brand) !important;
+}
+.brand-dot{
+  background: linear-gradient(135deg, var(--brand), var(--brand2)) !important;
+  box-shadow: 0 0 0 4px rgba(22,163,74,.14) !important;
+}
+
+.navbar .nav-link{
+  color: rgba(15,23,42,.78) !important;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: .55rem .85rem !important;
+  transition: all .18s ease;
+}
+.navbar .nav-link:hover{
+  background: rgba(22,163,74,.10) !important;
+  color: var(--brand) !important;
+}
+
+/* Right CTA buttons */
+.nav-cta{
+  background: rgba(255,255,255,.55) !important;
+  border: 1px solid rgba(15,23,42,.10) !important;
+  color: rgba(15,23,42,.84) !important;
+  border-radius: 14px;
+  transition: all .18s ease;
+}
+.nav-cta:hover{
+  background: rgba(22,163,74,.10) !important;
+  border-color: rgba(22,163,74,.22) !important;
+  color: var(--brand) !important;
+}
+
+/* Make navbar always above hero overlays/dropdowns */
+.navbar{ z-index: 3000 !important; }
+.dropdown-menu{ z-index: 3100 !important; }
+
+/* Dropdown: light + luxury */
+.dropdown-menu.dropdown-menu-dark{
+  background: rgba(255,255,255,.92) !important;
+  border: 1px solid rgba(15,23,42,.10) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.dropdown-menu.dropdown-menu-dark .dropdown-item{
+  color: rgba(15,23,42,.86) !important;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: .7rem .9rem;
+}
+.dropdown-menu.dropdown-menu-dark .dropdown-item:hover{
+  background: rgba(22,163,74,.10) !important;
+  color: var(--brand) !important;
+}
+.dropdown-menu.dropdown-menu-dark .dropdown-divider{
+  border-color: rgba(15,23,42,.10) !important;
+}
+
+/* ===== HERO: glass card ===== */
+.hero{
+  background: rgba(255,255,255,.62) !important;
+  border: 1px solid rgba(15,23,42,.10) !important;
+  border-radius: 26px !important;
+  box-shadow: var(--shadow) !important;
+  overflow: hidden;
+}
+.hero:before{
+  opacity: .20 !important;
+  filter: blur(30px) !important;
+}
+
+/* hero text */
+.hero-title{ color: rgba(15,23,42,.95) !important; }
+.hero-sub{ color: rgba(15,23,42,.62) !important; }
+
+/* ===== Search panel / inputs ===== */
+.search-wrap{
+  background: rgba(255,255,255,.70) !important;
+  border: 1px solid rgba(15,23,42,.10) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 12px 28px rgba(15,23,42,.06);
+}
+
+.form-control, .form-select{
+  background: rgba(255,255,255,.78) !important;
+  border: 1px solid rgba(15,23,42,.12) !important;
+  color: rgba(15,23,42,.92) !important;
+  border-radius: 14px !important;
+}
+.form-control::placeholder{
+  color: rgba(15,23,42,.42) !important;
+}
+
+/* Primary brand button (green gradient, luxury) */
+.btn-brand{
+  background: linear-gradient(135deg, rgba(22,163,74,.98), rgba(34,197,94,.98)) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 14px !important;
+  box-shadow: 0 14px 28px rgba(22,163,74,.20);
+}
+.btn-brand:hover{
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+}
+
+/* Ghost button */
+.btn-ghost{
+  background: rgba(255,255,255,.62) !important;
+  border: 1px solid rgba(15,23,42,.12) !important;
+  color: rgba(15,23,42,.84) !important;
+  border-radius: 14px !important;
+}
+.btn-ghost:hover{
+  background: rgba(22,163,74,.10) !important;
+  border-color: rgba(22,163,74,.22) !important;
+  color: var(--brand) !important;
+}
+
+/* ===== Category pills ===== */
+.pill{
+  background: rgba(255,255,255,.72) !important;
+  border: 1px solid rgba(15,23,42,.10) !important;
+  color: rgba(15,23,42,.82) !important;
+  border-radius: 999px !important;
+}
+.pill:hover{
+  background: rgba(22,163,74,.10) !important;
+  color: var(--brand) !important;
+}
+.pill.active{
+  background: linear-gradient(135deg, rgba(22,163,74,.14), rgba(34,197,94,.14)) !important;
+  border-color: rgba(22,163,74,.24) !important;
+  box-shadow: 0 12px 26px rgba(22,163,74,.10);
+}
+
+/* ===== Cards (menu) ===== */
+.menu-card{
+  background: rgba(255,255,255,.78) !important;
+  border: 1px solid rgba(15,23,42,.10) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.menu-title{ color: rgba(15,23,42,.94) !important; }
+.menu-desc{ color: rgba(15,23,42,.62) !important; }
+.menu-footer{ border-top: 1px solid rgba(15,23,42,.08) !important; }
+
+.badge-cat{
+  background: rgba(22,163,74,.10) !important;
+  border: 1px solid rgba(22,163,74,.18) !important;
+  color: rgba(22,163,74,.95) !important;
+  font-weight: 900;
+}
+
+.price{
+  background: linear-gradient(135deg, rgba(22,163,74,.12), rgba(14,165,233,.10)) !important;
+  border: 1px solid rgba(22,163,74,.18) !important;
+  color: rgba(15,23,42,.92) !important;
+  border-radius: 14px !important;
+}
+
+/* ===== Footer: glass white ===== */
+footer{
+  background: rgba(255,255,255,.70) !important;
+  border-top: 1px solid rgba(15,23,42,.10) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.footer-muted{ color: rgba(15,23,42,.55) !important; }
+
+/* Autocomplete (light) */
+.ui-autocomplete{
+  background: rgba(255,255,255,.95) !important;
+  border: 1px solid rgba(15,23,42,.10) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+.ui-menu-item-wrapper{
+  color: rgba(15,23,42,.86) !important;
+  font-weight: 700;
+  border-radius: 12px;
+}
+.ui-state-active{
+  background: rgba(22,163,74,.12) !important;
+  color: var(--brand) !important;
+}
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand text-white d-flex align-items-center gap-2" href="{{ url_for('search') }}">
+        <i class="fa-solid fa-utensils"></i>
+        <span>GreenBite</span><span class="brand-dot"></span>
+      </a>
+
+      <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#topNav" aria-controls="topNav" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" id="topNav">
+        <!-- Left links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 gap-lg-1">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{ url_for('search') }}">Menu</a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Explore
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark shadow">
+              <li><a class="dropdown-item" href="/about"><i class="fa-regular fa-circle-question me-2"></i>About Us</a></li>
+              <li><a class="dropdown-item" href="/contact"><i class="fa-regular fa-envelope me-2"></i>Contact</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-receipt me-2"></i>My Orders</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <!-- Navbar search -->
+        <form class="d-flex gap-2 me-lg-3 my-3 my-lg-0" method="GET" action="{{ url_for('search') }}">
+          <div class="input-group">
+            <span class="input-group-text bg-transparent text-white border-0" style="border-top-left-radius:14px;border-bottom-left-radius:14px;">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input
+              class="form-control"
+              type="search"
+              name="search"
+              placeholder="Search dishes..."
+              aria-label="Search dishes"
+              style="min-width: 220px; border-top-right-radius:14px;border-bottom-right-radius:14px;"
+            />
+          </div>
+          <button class="btn nav-cta" type="submit">Search</button>
+        </form>
+
+        <!-- Right actions -->
+        <div class="d-flex align-items-center gap-2">
+          <a class="btn nav-cta position-relative" href="/cart" aria-label="Cart">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ cart_count or 0 }}
+            </span>
+          </a>
+
+          <!-- Profile / Auth -->
+          <div class="dropdown">
+            <button class="btn nav-cta dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-regular fa-user me-1"></i> Account
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+              <li><a class="dropdown-item" href="/login"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</a></li>
+              <li><a class="dropdown-item" href="/register"><i class="fa-solid fa-user-plus me-2"></i>Register</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/profile"><i class="fa-regular fa-id-badge me-2"></i>Profile</a></li>
+              <li><a class="dropdown-item" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Logout</a></li>
+            </ul>
+          </div>
+
+          <a class="btn btn-brand" href="/reservation">
+            <i class="fa-regular fa-calendar-check me-1"></i> Book a Table
+          </a>
+        </div>
       </div>
-    </form>
+    </div>
+  </nav>
 
-    <!-- Menu Items -->
-    <div class="row">
-      {% for item in items %}
-        <div class="col-md-6 col-lg-4 mb-4">
-          <div class="card shadow-sm h-100">
-            <!-- Card Image -->
-            {% if item.image %}
-              <img 
-                src="{{ url_for('static', filename='uploads/' ~ item.image) }}" 
-                class="card-img-top" 
-                alt="{{ item.name }}" 
-                style="height: 200px; object-fit: cover;"
-              >
-            {% else %}
-              <div class="card-img-top d-flex align-items-center justify-content-center bg-light" 
-                   style="height: 200px;">
-                <p class="text-muted mb-0">No Image Available</p>
+  <!-- MAIN -->
+  <main class="container my-4 my-lg-5">
+
+    <!-- HERO -->
+    <section class="hero p-4 p-lg-5 mb-4">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+          <h1 class="hero-title display-6 mb-2">Our Menu</h1>
+          <p class="hero-sub mb-0">
+            Chọn món nhanh, tìm kiếm thông minh, lọc theo danh mục — giao diện gọn gàng và chuyên nghiệp.
+          </p>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="search-wrap">
+            <!-- Search Form (Main) -->
+            <form method="GET" action="{{ url_for('search') }}" class="mb-3">
+              <label class="form-label fw-bold mb-2" for="searchInput">
+                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Search by name
+              </label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchInput"
+                  name="search"
+                  placeholder="Ví dụ: Pho, Pizza, Burger..."
+                  aria-label="Search"
+                />
+                <button class="btn btn-brand" type="submit">
+                  <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                </button>
               </div>
-            {% endif %}
+            </form>
 
-            <!-- Card Body -->
-            <div class="card-body">
-              <h5 class="card-title text-primary">{{ item.name }}</h5>
-              <p class="card-text text-secondary">{{ item.description }}</p>
-            </div>
+            <!-- Filter Pills -->
+            <div>
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="fw-bold">
+                  <i class="fa-solid fa-filter me-1"></i> Filter by Dish Type
+                </div>
+                <a class="btn btn-ghost btn-sm" href="{{ url_for('search') }}">
+                  Reset
+                </a>
+              </div>
 
-            <!-- Card Footer -->
-            <div class="card-footer d-flex justify-content-between align-items-center">
-              <span class="fw-bold text-success">{{ "%.2f"|format(item.price) }}VND</span>
-              <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST" class="m-0">
-  <input type="hidden" name="quantity" value="1"/>
-  <button type="submit" class="btn btn-sm btn-outline-primary">
-    Add to Cart
-  </button>
-</form>
+              {% if categories %}
+              <div class="d-flex flex-wrap gap-2">
+                <a
+                  class="pill {% if not selected_category %}active{% endif %}"
+                  href="{{ url_for('search') }}"
+                >
+                  <i class="fa-solid fa-border-all"></i> All
+                </a>
 
+                {% for cat in categories %}
+                  {% if cat and cat != 'Uncategorized' %}
+                    <a
+                      class="pill {% if selected_category == cat %}active{% endif %}"
+                      href="{{ url_for('search', category=cat) }}"
+                    >
+                      <i class="fa-solid fa-tag"></i> {{ cat }}
+                    </a>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% else %}
+                <div class="text-warning small">Chưa có danh mục để lọc.</div>
+              {% endif %}
             </div>
           </div>
         </div>
-      {% endfor %}
+      </div>
+    </section>
+
+    <!-- MENU GRID -->
+    <section>
+      <div class="d-flex align-items-end justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+          <h2 class="h4 mb-1 fw-bold">Featured Dishes</h2>
+          <div class="text-secondary" style="color:rgba(15,23,42,.60) !important;">
+            {{ items|length }} item(s) found
+            {% if selected_category %} • Category: <span class="fw-bold">{{ selected_category }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <a class="btn btn-ghost" href="/cart">
+            <i class="fa-solid fa-cart-shopping me-1"></i> Go to Cart
+          </a>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        {% for item in items %}
+          <div class="col-md-6 col-lg-4">
+            <div class="menu-card">
+              {% if item.image %}
+                <img
+                  src="{{ url_for('static', filename='uploads/' ~ item.image) }}"
+                  alt="{{ item.name }}"
+                  class="menu-img"
+                  loading="lazy"
+                />
+              {% else %}
+                <div class="menu-img d-flex align-items-center justify-content-center">
+                  <div class="text-center">
+                    <i class="fa-regular fa-image fa-2x mb-2" style="color: rgba(229,231,235,.55)"></i>
+                    <div style="color: rgba(229,231,235,.65)">No Image Available</div>
+                  </div>
+                </div>
+              {% endif %}
+
+              <div class="menu-body">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                  <h3 class="menu-title">{{ item.name }}</h3>
+                  {% if item.category %}
+                    <span class="badge badge-cat">{{ item.category }}</span>
+                  {% endif %}
+                </div>
+
+                <p class="menu-desc mb-0">
+                  {{ item.description }}
+                </p>
+              </div>
+
+              <div class="menu-footer">
+                <div class="price">
+                  {{ "{:,.0f}".format(item.price) }} ₫
+                </div>
+
+                <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST" class="m-0">
+                  <input type="hidden" name="quantity" value="1" />
+                  <button type="submit" class="btn btn-ghost">
+                    <i class="fa-solid fa-plus me-1"></i> Add to Cart
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if items|length == 0 %}
+        <div class="text-center py-5">
+          <div class="mb-2"><i class="fa-regular fa-face-frown fa-2x"></i></div>
+          <div class="fw-bold">Không tìm thấy món phù hợp.</div>
+          <div class="footer-muted">Hãy thử từ khóa khác hoặc reset bộ lọc.</div>
+        </div>
+      {% endif %}
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-5">
+    <div class="container py-4">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-6">
+          <div class="fw-bold d-flex align-items-center gap-2">
+            <i class="fa-solid fa-utensils"></i> GreenBite Restaurant
+          </div>
+          <div class="footer-muted small mt-1">
+            Fresh • Fast • Friendly — Powered by Flask + Bootstrap
+          </div>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <a class="text-decoration-none me-3 footer-muted" href="/privacy">Privacy</a>
+          <a class="text-decoration-none me-3 footer-muted" href="/terms">Terms</a>
+          <a class="text-decoration-none footer-muted" href="/contact">Support</a>
+        </div>
+      </div>
     </div>
-  </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
       $("#searchInput").autocomplete({
-        source: function(request, response) {
+        source: function (request, response) {
           $.ajax({
             url: "/api/menu_suggestions",
             dataType: "json",
-            success: function(data) {
-              // Filter suggestions based on input
-              var filtered = data.filter(function(item) {
+            success: function (data) {
+              var filtered = data.filter(function (item) {
                 return item.toLowerCase().includes(request.term.toLowerCase());
               });
-              response(filtered.slice(0, 10)); // Limit to 10 suggestions
+              response(filtered.slice(0, 10));
             }
           });
         },
-        minLength: 1, // Start suggesting after 1 character
-        select: function(event, ui) {
-          // When user selects a suggestion, submit the form
+        minLength: 1,
+        select: function (event, ui) {
           $(this).val(ui.item.value);
-          $(this).closest('form').submit();
+          $(this).closest("form").submit();
         }
       });
     });
   </script>
-{% endblock %}
+
+</body>
+</html>

@@ -2,12 +2,27 @@ import base64
 from functools import wraps
 import socket
 import token
+import os
+import tempfile
+
+from dotenv import load_dotenv
+
+# ✅ Load .env bằng đường dẫn tuyệt đối, trước khi import ai_helper
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), override=True)
+
 from flask import Flask, render_template, request, session, redirect, url_for, abort, jsonify, flash, Response
 from controller.menu_controller import MenuController
 from controller.auth_controller import AuthController
 from controller.user_controller import UserController
 from controller.order_controller import OrderController
+
+# ✅ Import AI helper SAU khi dotenv đã load
+from ai_helper import analyze_food_image
+from chatbot_ai import chat_with_ai, get_greeting_message
+
 from reportlab.lib.pagesizes import letter
+
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -226,9 +241,16 @@ def datetimeformat(value, format='%Y-%m-%dT%H:%M'):
 
 @app.context_processor
 def inject_user():
+    # Expose common template variables site-wide
+    cart = session.get('cart', {})
+    try:
+        cart_count = sum(int(v.get('quantity', 0)) for v in cart.values())
+    except Exception:
+        cart_count = 0
     return {
         'username': session.get('username'),
-        'role': session.get('role')
+        'role': session.get('role'),
+        'cart_count': cart_count
     }
 
 def admin_required(f):
@@ -865,6 +887,46 @@ def menu_suggestions():
     suggestions = [item['name'] for item in items]
     return jsonify(suggestions)
 
+@app.route('/api/analyze_food_image', methods=['POST'])
+def analyze_food_image_api():
+    """API để phân tích hình ảnh món ăn và tự động tạo tên + mô tả"""
+    try:
+        if 'image' not in request.files:
+            return jsonify({'success': False, 'error': 'No image file provided'}), 400
+        
+        image_file = request.files['image']
+        if image_file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'}), 400
+        
+        # Validate file extension
+        allowed_extensions = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
+        file_ext = image_file.filename.rsplit('.', 1)[-1].lower()
+        if file_ext not in allowed_extensions:
+            return jsonify({'success': False, 'error': 'Invalid image format'}), 400
+        
+        # Save image temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f'.{file_ext}') as tmp_file:
+            image_file.save(tmp_file.name)
+            temp_path = tmp_file.name
+        
+        try:
+            # Analyze image with AI (include original filename so fallback can guess correctly)
+            result = analyze_food_image(temp_path, original_filename=image_file.filename)
+            
+            # Clean up temp file
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            
+            return jsonify(result)
+        except Exception as e:
+            # Clean up temp file
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Server error: {str(e)}'}), 500
+
 @app.route('/category/<category>')
 def category(category):
     template_name = f'category_{category}.html'
@@ -974,10 +1036,205 @@ def datetimeformat(value, format='%Y-%m-%dT%H:%M'):
 
     return str(value)
 
-# Chatbot route
+# Chatbot route (legacy)
 @app.route("/chatbot")
 def chatbot():
     return render_template("chatbot.html")
+
+# ===== AI-POWERED ORDERING CHATBOT =====
+@app.route("/ai-chat")
+def ai_chat():
+    """Render the AI ordering chatbot page."""
+    return render_template("ai_chat.html")
+
+
+@app.route("/api/ai-chat/send", methods=["POST"])
+def ai_chat_send():
+    """Process a message through the AI ordering agent."""
+    try:
+        user_message = (request.json or {}).get("message", "").strip()
+
+        # Initialize conversation history if needed
+        if "ai_chat_history" not in session:
+            session["ai_chat_history"] = []
+
+        # Handle init request → return greeting
+        if user_message == "__INIT__":
+            session["ai_chat_history"] = []
+            greeting = get_greeting_message(session.get("username"))
+            session["ai_chat_history"] = [
+                {"role": "model", "parts": [greeting["message"]]}
+            ]
+            session.modified = True
+            cart = session.get("cart", {})
+            cart_count = sum(int(v.get("quantity", 0)) for v in cart.values())
+            greeting["cart_count"] = cart_count
+            return jsonify(greeting)
+
+        if not user_message:
+            return jsonify({"message": "Please type a message.", "action": None, "suggestions": []})
+
+        # Fetch current data
+        menu_items = menu_controller.model.get_menu() or []
+        available_tables = order_controller.model.get_available_tables() or []
+        cart = session.get("cart", {})
+        username = session.get("username")
+
+        # Add user message to history
+        history = session.get("ai_chat_history", [])
+        history.append({"role": "user", "parts": [user_message]})
+
+        # Call AI
+        ai_response = chat_with_ai(
+            conversation_history=history,
+            user_message=user_message,
+            menu_items=menu_items,
+            tables=available_tables,
+            cart=cart,
+            username=username
+        )
+
+        # Execute action if present
+        action = ai_response.get("action")
+        action_data = ai_response.get("action_data") or {}
+
+        if action == "add_to_cart":
+            item_id = action_data.get("item_id")
+            qty = int(action_data.get("quantity", 1))
+            if item_id:
+                menu_item = menu_controller.model.get_menu_item_by_id(int(item_id))
+                if menu_item:
+                    key = str(item_id)
+                    if key in cart:
+                        cart[key]["quantity"] = int(cart[key].get("quantity", 0)) + qty
+                    else:
+                        cart[key] = {
+                            "name": menu_item["name"],
+                            "price": menu_item["price"],
+                            "image": menu_item.get("image"),
+                            "quantity": qty
+                        }
+                    session["cart"] = cart
+
+        elif action == "remove_from_cart":
+            item_id = action_data.get("item_id")
+            if item_id:
+                cart.pop(str(item_id), None)
+                session["cart"] = cart
+
+        elif action == "clear_cart":
+            session["cart"] = {}
+            cart = {}
+
+        elif action == "place_order":
+            if cart:
+                ai_response["redirect"] = url_for("view_cart")
+            else:
+                ai_response["message"] += "<br><br>⚠️ Your cart is empty. Add some items first!"
+                ai_response["action"] = None
+
+        # Store model response in history
+        history.append({"role": "model", "parts": [ai_response.get("message", "")]})
+
+        # Keep history manageable
+        if len(history) > 60:
+            history = history[-60:]
+        session["ai_chat_history"] = history
+        session.modified = True
+
+        # Add cart count to response
+        cart = session.get("cart", {})
+        ai_response["cart_count"] = sum(int(v.get("quantity", 0)) for v in cart.values())
+
+        return jsonify(ai_response)
+
+    except Exception as e:
+        app.logger.exception("ai_chat_send failed")
+        return jsonify({
+            "message": "Sorry, something went wrong on the server. Please try again! 🙏",
+            "action": None,
+            "action_data": None,
+            "suggestions": ["🍽️ View menu", "🛒 Show cart", "🔄 Try again"],
+            "items_to_show": None,
+            "cart_count": sum(int(v.get("quantity", 0)) for v in session.get("cart", {}).values())
+        }), 200
+
+
+@app.route("/api/ai-chat/reset", methods=["POST"])
+def ai_chat_reset():
+    """Reset the AI chat conversation."""
+    session.pop("ai_chat_history", None)
+    return jsonify({"success": True})
+
+
+@app.route("/api/ai-chat/add-to-cart", methods=["POST"])
+def ai_chat_add_to_cart():
+    """Direct add-to-cart from product card buttons — no AI roundtrip needed."""
+    try:
+        data = request.json or {}
+        item_id = data.get("item_id")
+        qty = int(data.get("quantity", 1))
+
+        if not item_id:
+            return jsonify({"success": False, "message": "Missing item_id"})
+
+        menu_item = menu_controller.model.get_menu_item_by_id(int(item_id))
+        if not menu_item:
+            return jsonify({"success": False, "message": "Item not found"})
+
+        cart = session.get("cart", {})
+        key = str(item_id)
+        if key in cart:
+            cart[key]["quantity"] = int(cart[key].get("quantity", 0)) + qty
+        else:
+            cart[key] = {
+                "name": menu_item["name"],
+                "price": menu_item["price"],
+                "image": menu_item.get("image"),
+                "quantity": qty
+            }
+        session["cart"] = cart
+        session.modified = True
+
+        cart_count = sum(int(v.get("quantity", 0)) for v in cart.values())
+        cart_total = sum(float(v.get("price", 0)) * int(v.get("quantity", 0)) for v in cart.values())
+
+        return jsonify({
+            "success": True,
+            "message": f"Added {qty}x {menu_item['name']} to cart!",
+            "cart_count": cart_count,
+            "cart_total": cart_total,
+            "cart": {k: v for k, v in cart.items()}
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+
+
+@app.route("/api/ai-chat/cart-summary", methods=["GET"])
+def ai_chat_cart_summary():
+    """Get current cart summary for the AI chat interface."""
+    cart = session.get("cart", {})
+    items = []
+    total = 0
+    for k, v in cart.items():
+        qty = int(v.get("quantity", 0))
+        price = float(v.get("price", 0))
+        items.append({
+            "id": k,
+            "name": v.get("name"),
+            "price": price,
+            "quantity": qty,
+            "image": v.get("image"),
+            "subtotal": price * qty
+        })
+        total += price * qty
+
+    return jsonify({
+        "success": True,
+        "items": items,
+        "total": total,
+        "count": sum(int(v.get("quantity", 0)) for v in cart.values())
+    })
 
 @app.route("/chatbot/send", methods=["POST"])
 def chatbot_send():
@@ -1202,7 +1459,7 @@ def handle_chatbot_message(message):
         return "Phương thức thanh toán: " + ", ".join(restaurant_info['payment'])
 
     # default
-    return "Xin chào! Tôi có thể gợi ý món và giúp bạn đặt hàng. Hãy thử: 'Gợi ý', 'Đặt 2 Phở Bò', hoặc 'Xem giỏ hàng'."
+    return "Xin chào! Tôi có thể gợi ý món và giúp bạn đặt hàng."
 
 # QR Code Routes
 @app.route('/scan_qr')

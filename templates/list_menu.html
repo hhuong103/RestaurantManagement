@@ -60,6 +60,7 @@
           <th scope="col">Image</th>
           <th scope="col">Name</th>
           <th scope="col">Price</th>
+          <th scope="col">Category</th>
           <th scope="col">Rating</th>
           <th scope="col">Description</th>
           <th scope="col">Actions</th>
@@ -85,6 +86,7 @@
 
           <td class="fw-semibold text-dark">{{ item.name }}</td>
           <td class="text-success fw-bold">{{ "%.2f"|format(item.price) }} VND</td>
+          <td class="text-info">{{ item.category or 'N/A' }}</td>
           <td>
             {% set rating = [item.rating, 0] | max %}
             {% set rating = [rating, 5] | min %}

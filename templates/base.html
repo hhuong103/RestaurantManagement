@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Restaurant{% endblock %}</title>
+    <title>{% block title %}GreenBite Restaurant{% endblock %}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <!-- Bootstrap Icons -->
@@ -16,190 +17,230 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Sidebar Styles -->
+
+    <!-- ✅ NEW LIGHT PROFESSIONAL THEME (only colors + layout) -->
     <style>
-      /* Sidebar */
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: -250px;
-        width: 250px;
-        height: 100vh;
-        background: #2b2d42;
-        padding-top: 60px;
-        transition: left 0.3s ease;
-        z-index: 999;
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      :root{
+        --bg: #f6f8fc;
+        --surface: #ffffff;
+        --surface-2: #fbfdff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: rgba(17, 24, 39, 0.10);
+        --shadow: 0 18px 40px rgba(17, 24, 39, 0.10);
+        --shadow-soft: 0 10px 24px rgba(17, 24, 39, 0.08);
+        --radius: 18px;
+
+        --brand: #16a34a;     /* green */
+        --brand-2: #2563eb;   /* blue */
+        --accent: #0ea5e9;    /* sky */
       }
 
-      .sidebar.active {
-        left: 0;
-      }
-
-      .sidebar-nav {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      .sidebar-nav li {
-        margin: 0;
-      }
-
-      .sidebar-nav a {
-        display: block;
-        padding: 1rem 1.5rem;
-        color: #edf2f4;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        border-left: 4px solid transparent;
-      }
-
-      .sidebar-nav a:hover {
-        background: rgba(239, 35, 60, 0.1);
-        color: #ef233c;
-        border-left-color: #ef233c;
-        padding-left: 2rem;
-      }
-
-      .sidebar-nav i {
-        margin-right: 0.75rem;
-        width: 20px;
-        text-align: center;
-      }
-
-      /* Navbar Adjustment */
-      .navbar {
-        position: relative;
-        z-index: 1000;
-      }
-
-      .sidebar-toggle {
-        background: none;
-        border: none;
-        color: #edf2f4;
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 0.5rem;
-        margin-right: 1rem;
-      }
-
-      .sidebar-toggle:hover {
-        color: #ef233c;
-      }
-
-      /* Overlay when sidebar is open */
-      .sidebar-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 998;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-      }
-
-      .sidebar-overlay.active {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      /* Responsive */
-      @media (max-width: 768px) {
-        .sidebar {
-          width: 100%;
-        }
-
-        .navbar-nav {
-          display: none;
-        }
-
-        .sidebar-toggle {
-          display: inline-block;
-        }
-      }
-
-      @media (min-width: 769px) {
-        .sidebar {
-          display: none;
-        }
-
-        .sidebar-toggle {
-          display: none;
-        }
-
-        /* Show as horizontal menu for desktop */
-        .admin-menu {
-          display: flex;
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        }
-
-        .admin-menu li {
-          margin: 0;
-        }
-
-        .admin-menu a {
-          padding: 1rem 1rem;
-          color: #edf2f4;
-          text-decoration: none;
-          transition: color 0.3s ease;
-        }
-
-        .admin-menu a:hover {
-          color: #ef233c;
-        }
-      }
-    </style>
-
-    <style>
       body {
         font-family: 'Poppins', sans-serif;
-        background: #f8f1e9;
-        color: #333;
+        background: radial-gradient(900px 500px at 10% 5%, rgba(37, 99, 235, .10), transparent 55%),
+                    radial-gradient(900px 500px at 90% 10%, rgba(22, 163, 74, .10), transparent 55%),
+                    linear-gradient(180deg, var(--bg), #ffffff);
+        color: var(--text);
       }
 
       h1, h2, h3, h4, h5, h6 {
         font-family: 'Playfair Display', serif;
+        letter-spacing: .2px;
       }
 
-      /* Navbar */
+      /* =========================
+         NAVBAR (light, premium)
+         ========================= */
       .navbar {
-        background: #2b2d42;
-        padding: 1rem 0;
+        background: rgba(255,255,255,.92) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+        padding: .85rem 0;
+        box-shadow: 0 10px 20px rgba(17,24,39,.06);
       }
 
-      .navbar-brand, .nav-link {
-        color: #edf2f4 !important;
-        transition: color 0.3s ease;
+      .navbar-brand{
+        font-weight: 800;
+        color: var(--text) !important;
+      }
+      .navbar-brand i{ color: var(--brand); }
+
+      .nav-link{
+        color: rgba(17,24,39,.82) !important;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: .55rem .85rem !important;
+        transition: all .18s ease;
+      }
+      .nav-link:hover{
+        background: rgba(37,99,235,.08);
+        color: var(--brand-2) !important;
       }
 
-      .nav-link:hover {
-        color: #ef233c !important;
+      .dropdown-menu{
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+      }
+      .dropdown-item{
+        font-weight: 600;
+        padding: .65rem 1rem;
+      }
+      .dropdown-item:hover{
+        background: rgba(22,163,74,.10);
+        color: #0f5132;
       }
 
+      /* keep existing button types, just re-skin */
       .btn-outline-secondary, .btn-outline-primary, .btn-outline-success {
-        border-radius: 20px;
-        padding: 0.5rem 1.5rem;
-        font-weight: 500;
+        border-radius: 999px;
+        padding: 0.55rem 1.15rem;
+        font-weight: 700;
+        border-width: 1px;
+      }
+      .btn-outline-primary{
+        border-color: rgba(37,99,235,.35);
+        color: var(--brand-2);
+      }
+      .btn-outline-primary:hover{
+        background: rgba(37,99,235,.10);
+        color: var(--brand-2);
+      }
+      .btn-outline-success{
+        border-color: rgba(22,163,74,.35);
+        color: var(--brand);
+      }
+      .btn-outline-success:hover{
+        background: rgba(22,163,74,.10);
+        color: var(--brand);
+      }
+      .btn-outline-secondary{
+        border-color: rgba(17,24,39,.22);
+        color: rgba(17,24,39,.78);
+      }
+      .btn-outline-secondary:hover{
+        background: rgba(17,24,39,.06);
+        color: rgba(17,24,39,.90);
       }
 
-      /* Hero Section */
+      /* Fix toggler icon for navbar-dark (since background now light) */
+      .navbar-dark .navbar-toggler{
+        border: 1px solid rgba(17,24,39,.10);
+        border-radius: 14px;
+      }
+      .navbar-dark .navbar-toggler-icon{
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(17, 24, 39, 0.85)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      }
+
+      /* =========================
+         SIDEBAR (light + clean)
+         ========================= */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -270px;
+        width: 270px;
+        height: 100vh;
+        background: rgba(255,255,255,.96);
+        padding-top: 72px;
+        transition: left 0.28s ease;
+        z-index: 999;
+        overflow-y: auto;
+        border-right: 1px solid var(--border);
+        box-shadow: 8px 0 26px rgba(17,24,39,.10);
+      }
+
+      .sidebar.active { left: 0; }
+
+      .sidebar-nav { list-style: none; padding: 0; margin: 0; }
+
+      .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .95rem 1.15rem;
+        color: rgba(17,24,39,.86);
+        text-decoration: none;
+        transition: all 0.18s ease;
+        border-left: 4px solid transparent;
+        font-weight: 700;
+      }
+
+      .sidebar-nav a:hover {
+        background: rgba(37,99,235,.08);
+        color: var(--brand-2);
+        border-left-color: var(--brand-2);
+        padding-left: 1.35rem;
+      }
+
+      .sidebar-nav i { width: 20px; text-align: center; color: var(--brand); }
+
+      .sidebar-toggle {
+        background: rgba(37,99,235,.08);
+        border: 1px solid rgba(37,99,235,.18);
+        color: var(--brand-2);
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: .45rem .65rem;
+        border-radius: 14px;
+        margin-right: .85rem;
+        transition: all .18s ease;
+      }
+      .sidebar-toggle:hover { background: rgba(22,163,74,.10); border-color: rgba(22,163,74,.22); color: var(--brand); }
+
+      .sidebar-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(17,24,39,0.35);
+        z-index: 998;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.25s ease;
+      }
+      .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+      /* Responsive giữ nguyên logic cũ */
+      @media (max-width: 768px) {
+        .sidebar { width: 100%; left: -100%; }
+        .sidebar.active { left: 0; }
+        .navbar-nav { display: none; }
+        .sidebar-toggle { display: inline-block; }
+      }
+      @media (min-width: 769px) {
+        .sidebar { display: none; }
+        .sidebar-toggle { display: none; }
+        .admin-menu { display: flex; list-style: none; padding: 0; margin: 0; }
+        .admin-menu a { padding: 1rem 1rem; color: rgba(17,24,39,.85); text-decoration: none; transition: color 0.3s ease; }
+        .admin-menu a:hover { color: var(--brand-2); }
+      }
+
+      /* =========================
+         HERO (bright + premium)
+         ========================= */
       .hero {
-        min-height: 80vh;
+        min-height: 78vh;
         position: relative;
+        margin-top: 0;
       }
-
       #hero-image {
         transition: opacity 0.5s ease-in-out;
         object-fit: cover;
-        max-height: 80vh;
+        max-height: 78vh;
         width: 100%;
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+      }
+      /* overlay for readability */
+      .hero .position-relative:after{
+        content:"";
+        position:absolute;
+        inset:0;
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(17,24,39,.18), rgba(17,24,39,.45));
+        pointer-events:none;
       }
 
       .hero-text {
@@ -209,97 +250,219 @@
         transform: translate(-50%, -50%);
         text-align: center;
         color: #fff;
+        width: min(900px, 92%);
+        z-index: 2;
       }
-
       .hero-title {
         font-family: 'Roboto', sans-serif;
-        font-size: 3.5rem;
-        font-weight: 700;
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        font-weight: 800;
         text-transform: uppercase;
-        margin-bottom: 1rem;
-        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+        margin-bottom: .75rem;
+        text-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
       }
-
       .hero-description {
         font-family: 'Roboto', sans-serif;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 400;
-        margin-bottom: 2rem;
-        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+        margin-bottom: 0;
+        opacity: .95;
+        text-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
       }
 
-      .hero-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-      }
-
-      .hero-btn {
-        font-family: 'Roboto', sans-serif;
-        font-size: 1rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: #fff;
-        background: transparent;
-        border: 2px solid #fff;
-        border-radius: 25px;
-        padding: 0.75rem 2rem;
-        text-decoration: none;
-        transition: all 0.3s ease;
-      }
-
-      .hero-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: #fff;
-        color: #fff;
+      /* =========================
+         MAIN CONTENT LAYOUT
+         ========================= */
+      .container.mt-5{
+        margin-top: 2.25rem !important;
       }
 
       /* Sections */
       .about, .features {
-        background: #fff;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        padding: 3rem 0;
-        margin: 2rem 0;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: var(--shadow-soft);
+        padding: 3.25rem 0;
+        margin: 2.25rem 0;
       }
 
+      .about h2, .features h2{
+        font-weight: 800;
+        color: var(--text);
+      }
+
+      .about img, .features img{
+        border-radius: 18px;
+      }
+
+      /* Feature cards: keep component, enhance layout */
       .feature-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 10px 22px rgba(17,24,39,.06);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        height: 100%;
+      }
+      .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-soft);
+      }
+      .feature-card img{
+        width: 92px;
+        height: 92px;
+        object-fit: cover;
+        border-radius: 18px;
+        box-shadow: 0 8px 16px rgba(17,24,39,.08);
       }
 
-      .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      /* Offer hero section: keep it, make it look like card overlay */
+      .hero .position-absolute.bg-dark.bg-opacity-75{
+        background: rgba(255,255,255,.90) !important;
+        color: var(--text) !important;
+        border: 1px solid var(--border);
+        border-radius: 22px !important;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+      }
+      .hero .position-absolute.bg-dark.bg-opacity-75 .display-4{
+        color: var(--brand-2);
+      }
+      .hero .position-absolute.bg-dark.bg-opacity-75 .btn-warning{
+        background: linear-gradient(135deg, rgba(22,163,74,.95), rgba(37,99,235,.95));
+        border: none;
+        color: #fff;
+        font-weight: 800;
       }
 
       /* Footer */
       footer {
-        background: #2b2d42;
-        color: #edf2f4;
+        background: rgba(255,255,255,.92);
+        color: var(--text);
         padding: 3rem 0;
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -10px 20px rgba(17,24,39,.04);
       }
-
       footer a {
-        color: #edf2f4;
-        transition: color 0.3s ease;
+        color: rgba(17,24,39,.75);
+        transition: color 0.2s ease;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      footer a:hover { color: var(--brand-2); }
+      footer .social-icons a { font-size: 1.5rem; margin-right: 1rem; }
+
+      /* small polishing */
+      .shadow { box-shadow: 0 12px 24px rgba(17,24,39,.08) !important; }
+      .rounded, .rounded.shadow-sm { border-radius: 18px !important; }
+
+      /* jQuery UI dropdown look (still same component) */
+      .ui-autocomplete{
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-soft);
+        padding: 8px;
+        background: #fff;
+        max-height: 260px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      .ui-menu-item-wrapper{
+        border-radius: 12px;
+        padding: 10px 12px !important;
+        font-weight: 700;
+        color: rgba(17,24,39,.86);
+      }
+      .ui-state-active{
+        border: none !important;
+        background: rgba(37,99,235,.10) !important;
+        color: var(--brand-2) !important;
+        margin: 0 !important;
       }
 
-      footer a:hover {
-        color: #ef233c;
-      }
+      /* ✅ FIX: Không có khoảng trống giữa navbar và hình hero đầu tiên */
+nav.navbar{
+  margin-bottom: 0 !important;
+}
 
-      footer .social-icons a {
-        font-size: 1.5rem;
-        margin-right: 1rem;
-      }
+/* Chỉ áp dụng cho HERO NGAY SAU NAVBAR (không ảnh hưởng hero khác phía dưới) */
+nav.navbar + section.hero{
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  display: block !important;      /* override d-flex để tránh căn giữa tạo khoảng trống */
+  min-height: unset !important;   /* bỏ min-height gây dư khoảng trống */
+}
+
+/* đảm bảo ảnh dính sát lên trên, không có khoảng hở do inline */
+nav.navbar + section.hero #hero-image{
+  display: block !important;
+  margin-top: 0 !important;
+}
+
+/* nếu bạn có wrapper padding-top vô tình */
+nav.navbar + section.hero > .position-relative{
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+  /* ===== FIX TRIỆT ĐỂ: Dropdown không bị mờ bởi Hero overlay ===== */
+
+/* 1) Navbar & dropdown luôn nằm trên Hero */
+.navbar{
+  position: sticky;   /* giữ nguyên bố cục, không đổi thành phần */
+  top: 0;
+  z-index: 3000 !important;
+}
+
+/* Bootstrap dropdown menu phải nổi lên cao hơn hero overlay */
+.dropdown-menu{
+  z-index: 3100 !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Chữ trong dropdown rõ, không bị “xám” */
+.dropdown-menu .dropdown-item{
+  color: #111827 !important;
+  font-weight: 600;
+}
+.dropdown-menu .dropdown-item:hover{
+  background: rgba(37,99,235,.08) !important;
+  color: #2563eb !important;
+}
+
+/* 2) Khóa lớp overlay của HERO chỉ nằm trong hero, và nằm dưới navbar */
+.hero{
+  position: relative;
+  z-index: 1 !important;
+}
+
+/* overlay hero phải nằm dưới text và KHÔNG được vượt lên trên navbar/dropdown */
+.hero .position-relative{
+  position: relative;
+  z-index: 0 !important;
+}
+.hero .position-relative:after{
+  z-index: 1 !important;           /* chỉ phủ trên ảnh */
+  pointer-events: none;
+}
+.hero .hero-text{
+  position: absolute;
+  z-index: 2 !important;           /* chữ hero nằm trên overlay */
+}
     </style>
   </head>
-<!-- Sidebar Overlay -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<!-- Sidebar for Admin -->
-<nav class="sidebar" id="adminSidebar">
-    <ul class="sidebar-nav">
+  <body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar for Admin -->
+    <nav class="sidebar" id="adminSidebar">
+      <ul class="sidebar-nav">
         {% if username and role == 'admin' %}
         <li><a href="{{ url_for('dashboard') }}" class="sidebar-item"><i class="bi bi-speedometer"></i> Dashboard</a></li>
         <li><a href="{{ url_for('show_menu_list') }}" class="sidebar-item"><i class="bi bi-book"></i> Menu</a></li>
@@ -308,280 +471,282 @@
         <li><a href="{{ url_for('user_list') }}" class="sidebar-item"><i class="bi bi-people"></i> Users</a></li>
         <li><a href="/scan_qr" class="sidebar-item"><i class="bi bi-qr-code"></i> Scan QR</a></li>
         {% endif %}
-    </ul>
-</nav>
+      </ul>
+    </nav>
 
-<body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark shadow">
-    <div class="container-fluid">
-      {% if username and role == 'admin' %}
-      <button class="sidebar-toggle" id="sidebarToggle">
-        <i class="bi bi-list"></i>
-      </button>
-      {% endif %}
-      <a class="navbar-brand fw-bold" href="/">
-        <i class="bi bi-house-door-fill"></i> My Restaurant
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto">
-          {% if not (username and role == 'admin') %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-book-fill"></i> Menu
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="menuDropdown">
-              <li><a class="dropdown-item" href="/"><i class="bi bi-list-ul"></i> View All</a></li>
-              <li><a class="dropdown-item" href="/search"><i class="bi bi-search"></i> Search Menu</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/cart"><i class="bi bi-cart-fill"></i> Cart</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('transaction_history') }}"><i class="bi bi-clock-history"></i> Transaction History</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('chatbot') }}"><i class="bi bi-chat-dots-fill"></i> Chatbot</a>
-          </li>
-          {% else %}
-          <!-- Admin navbar items for desktop -->
-          <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer"></i> Dashboard</a>
-          </li>
-          <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="{{ url_for('show_menu_list') }}"><i class="bi bi-book"></i> Menu</a>
-          </li>
-          <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="{{ url_for('manage_tables') }}"><i class="bi bi-grid-3x2"></i> Tables</a>
-          </li>
-          <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="{{ url_for('list_orders') }}"><i class="bi bi-bag-check"></i> Orders</a>
-          </li>
-          <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="{{ url_for('user_list') }}"><i class="bi bi-people"></i> Users</a>
-          </li>
-          <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="/scan_qr"><i class="bi bi-qr-code"></i> Scan QR</a>
-          </li>
-          {% endif %}
-        </ul>
-        <div class="d-flex align-items-center">
-          {% if username %}
-            <span class="me-3 fw-bold text-light"><i class="bi bi-person-circle"></i> {{ username }} - {{ role }}</span>
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right"></i> Logout</a>
-          {% else %}
-            <a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2"><i class="bi bi-box-arrow-in-right"></i> Login</a>
-            <a href="{{ url_for('register') }}" class="btn btn-outline-success"><i class="bi bi-person-plus-fill"></i> Register</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Hero Section with Slideshow -->
-  <section class="hero text-center text-white d-flex align-items-center justify-content-center">
-    <div class="position-relative w-100">
-      <img id="hero-image" src="{{ url_for('static', filename='res.jpg') }}" alt="Promo Image" class="img-fluid">
-      <div class="hero-text">
-        <h1 class="hero-title">Welcome to my restaurant.</h1>
-        <p class="hero-description">Serving you is our pleasure</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- JavaScript for Hero Section Slideshow -->
-  <script>
-    const heroImages = [
-      "{{ url_for('static', filename='res.jpg') }}",
-      "{{ url_for('static', filename='restaurant.jpg') }}",
-      "{{ url_for('static', filename='pic.jpg') }}",
-      "{{ url_for('static', filename='pics.jpg') }}"
-    ];
-    heroImages.forEach(src => {
-      const img = new Image();
-      img.src = src;
-      img.onerror = () => console.error(`Failed to load image: ${src}`);
-    });
-    let currentHeroIndex = 0;
-    const heroImageElement = document.getElementById('hero-image');
-    function changeHeroImage() {
-      heroImageElement.style.opacity = 0;
-      setTimeout(() => {
-        currentHeroIndex = (currentHeroIndex + 1) % heroImages.length;
-        heroImageElement.src = heroImages[currentHeroIndex];
-        heroImageElement.alt = `Promo Image ${currentHeroIndex + 1}`;
-        heroImageElement.style.opacity = 1;
-      }, 500);
-    }
-    heroImageElement.style.opacity = 0;
-    setTimeout(() => heroImageElement.style.opacity = 1, 500);
-    setInterval(changeHeroImage, 3000);
-  </script>
-
-  <!-- Main Content -->
-  <div class="container mt-5">
-    {% block content %}
-    <!-- About Section -->
-    <section class="about">
-      <div class="container">
-        <h2 class="text-center mb-5">Our Best Sellers</h2>
-        <div class="row align-items-center">
-          <div class="col-md-6">
-            <h3 class="mb-4">Cheesy Baked Vegetable Rolls</h3>
-            <p>
-              Introduced by French colonialists in the mid-19th century, Vietnam has become one of the largest coffee exporters in the world. 
-              Our robusta beans and unique preparation methods elevate your coffee experience.
-            </p>
-            <div class="text-center my-4">
-              <img src="{{ url_for('static', filename='deco.jpg') }}" alt="Coffee Beans" class="img-fluid rounded shadow-sm">
-            </div>
-            <p>
-              Grown in the Central Highlands, our coffee thrives in ideal climates and fertile soils.
-            </p>
-          </div>
-          <div class="col-md-6">
-            <h3 class="text-center mb-4">About Us</h3>
-            <p>
-              Since our inception, we've celebrated Vietnamese coffee culture with a modern twist. 
-              Join us in the heart of the Central Highlands for an unparalleled dining experience.
-            </p>
-            <div class="text-center my-4">
-              <img src="{{ url_for('static', filename='image.jpg') }}" alt="Coffee Image" class="img-fluid rounded shadow-sm">
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features py-5">
-      <div class="container">
-        <h2 class="text-center mb-5">Why Choose Us</h2>
-        <div class="row g-4">
-          <div class="col-md-6 col-lg-3">
-            <div class="feature-card text-center p-4">
-              <img src="{{ url_for('static', filename='delivery_icon.jpg') }}" alt="Fast Delivery" class="img-fluid mb-3">
-              <h5 class="fw-bold">Fastest Door Delivery</h5>
-              <p>Enjoy your meal delivered swiftly to your doorstep.</p>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="feature-card text-center p-4">
-              <img src="{{ url_for('static', filename='vegetables.jpg') }}" alt="Fresh Beans" class="img-fluid mb-3">
-              <h5 class="fw-bold">Fresh Coffee Beans</h5>
-              <p>Sourced directly from Vietnam’s finest plantations.</p>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="feature-card text-center p-4">
-              <img src="{{ url_for('static', filename='quality_icon.jpg') }}" alt="Quality" class="img-fluid mb-3">
-              <h5 class="fw-bold">Best Quality Coffee</h5>
-              <p>Uncompromising standards for every cup.</p>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="feature-card text-center p-4">
-              <img src="{{ url_for('static', filename='booking_icon.jpg') }}" alt="Booking" class="img-fluid mb-3">
-              <h5 class="fw-bold">Online Table Booking</h5>
-              <p>Reserve your spot with ease.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Offer Section -->
-    <section class="hero text-center text-white d-flex align-items-center justify-content-center">
-      <div class="container-fluid p-0 position-relative">
-        <img src="{{ url_for('static', filename='bg.jpg') }}" alt="Coffee Shop" class="img-fluid w-100" style="max-height: 60vh; object-fit: cover;">
-        <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 p-5 rounded">
-          <h2 class="display-4 fw-bold">50% OFF</h2>
-          <p class="lead">Sunday Special Offer</p>
-          <p>Valid Sundays from Jan 1st to Jan 30th, 2025</p>
-          <form class="d-flex justify-content-center">
-            <input type="email" class="form-control me-2" placeholder="Your Email" style="max-width: 250px; border-radius: 20px;">
-            <button class="btn btn-warning" style="border-radius: 20px;">Sign Up</button>
-          </form>
-        </div>
-      </div>
-    </section>
-    {% endblock %}
-  </div>
-
-  <!-- Footer -->
-  <footer class="mt-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4 mb-4">
-          <h5 class="fw-bold">My Restaurant</h5>
-          <p class="small">
-            Crafting exceptional coffee and cuisine since 2020. Visit us for a taste of tradition and innovation.
-          </p>
-        </div>
-        <div class="col-md-4 mb-4">
-          <h5 class="fw-bold">Quick Links</h5>
-          <ul class="list-unstyled">
-            <li><a href="/"><i class="bi bi-house-door-fill me-2"></i>Home</a></li>
-            <li><a href="/cart"><i class="bi bi-cart-fill me-2"></i>Cart</a></li>
-            <li><a href="{{ url_for('transaction_history') }}"><i class="bi bi-clock-history me-2"></i>Transaction History</a></li>
-            {% if username and role == 'admin' %}
-              <li><a href="{{ url_for('dashboard') }}"><i class="bi bi-bar-chart-fill me-2"></i>Dashboard</a></li>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark shadow">
+      <div class="container-fluid">
+        {% if username and role == 'admin' %}
+        <button class="sidebar-toggle" id="sidebarToggle">
+          <i class="bi bi-list"></i>
+        </button>
+        {% endif %}
+        <a class="navbar-brand fw-bold" href="/">
+          <i class="bi bi-house-door-fill"></i> My Restaurant
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            {% if not (username and role == 'admin') %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-book-fill"></i> Menu
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+                <li><a class="dropdown-item" href="/"><i class="bi bi-list-ul"></i> View All</a></li>
+                <li><a class="dropdown-item" href="/search"><i class="bi bi-search"></i> Search Menu</a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/cart"><i class="bi bi-cart-fill"></i> Cart</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('transaction_history') }}"><i class="bi bi-clock-history"></i> Transaction History</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('ai_chat') }}"><i class="bi bi-robot"></i> AI Assistant</a>
+            </li>
+            {% else %}
+            <!-- Admin navbar items for desktop -->
+            <li class="nav-item d-none d-lg-block">
+              <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer"></i> Dashboard</a>
+            </li>
+            <li class="nav-item d-none d-lg-block">
+              <a class="nav-link" href="{{ url_for('show_menu_list') }}"><i class="bi bi-book"></i> Menu</a>
+            </li>
+            <li class="nav-item d-none d-lg-block">
+              <a class="nav-link" href="{{ url_for('manage_tables') }}"><i class="bi bi-grid-3x2"></i> Tables</a>
+            </li>
+            <li class="nav-item d-none d-lg-block">
+              <a class="nav-link" href="{{ url_for('list_orders') }}"><i class="bi bi-bag-check"></i> Orders</a>
+            </li>
+            <li class="nav-item d-none d-lg-block">
+              <a class="nav-link" href="{{ url_for('user_list') }}"><i class="bi bi-people"></i> Users</a>
+            </li>
+            <li class="nav-item d-none d-lg-block">
+              <a class="nav-link" href="/scan_qr"><i class="bi bi-qr-code"></i> Scan QR</a>
+            </li>
             {% endif %}
           </ul>
-        </div>
-        <div class="col-md-4 mb-4">
-          <h5 class="fw-bold">Contact Us</h5>
-          <p class="small">
-            <i class="bi bi-geo-alt-fill me-2"></i>123 Z15 St, Central Thai Nguyen, VN<br>
-            <i class="bi bi-telephone-fill me-2"></i>+84 123 456 789<br>
-            <i class="bi bi-envelope-fill me-2"></i>contact@myrestaurant.com
-          </p>
-          <div class="social-icons">
-            <a href="#"><i class="bi bi-facebook"></i></a>
-            <a href="#"><i class="bi bi-instagram"></i></a>
-            <a href="#"><i class="bi bi-twitter"></i></a>
-            <a href="#"><i class="bi bi-youtube"></i></a>
+          <div class="d-flex align-items-center">
+            {% if username %}
+              <span class="me-3 fw-bold" style="color: rgba(17,24,39,.78);">
+                <i class="bi bi-person-circle"></i> {{ username }} - {{ role }}
+              </span>
+              <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            {% else %}
+              <a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+              <a href="{{ url_for('register') }}" class="btn btn-outline-success"><i class="bi bi-person-plus-fill"></i> Register</a>
+            {% endif %}
           </div>
         </div>
       </div>
-      <div class="text-center mt-4 border-top pt-3">
-        <p class="small">© 2025 My Restaurant. All Rights Reserved.</p>
+    </nav>
+
+    <!-- Hero Section with Slideshow -->
+    <section class="hero text-center text-white d-flex align-items-center justify-content-center">
+      <div class="position-relative w-100 px-3 px-lg-5">
+        <img id="hero-image" src="{{ url_for('static', filename='res.jpg') }}" alt="Promo Image" class="img-fluid">
+        <div class="hero-text">
+          <h1 class="hero-title">Welcome to GreenBite Restaurant.</h1>
+          <p class="hero-description">Serving you is our pleasure</p>
+        </div>
       </div>
+    </section>
+
+    <!-- JavaScript for Hero Section Slideshow -->
+    <script>
+      const heroImages = [
+        "{{ url_for('static', filename='res.jpg') }}",
+        "{{ url_for('static', filename='restaurant.jpg') }}",
+        "{{ url_for('static', filename='pic.jpg') }}",
+        "{{ url_for('static', filename='pics.jpg') }}"
+      ];
+      heroImages.forEach(src => {
+        const img = new Image();
+        img.src = src;
+        img.onerror = () => console.error(`Failed to load image: ${src}`);
+      });
+      let currentHeroIndex = 0;
+      const heroImageElement = document.getElementById('hero-image');
+      function changeHeroImage() {
+        heroImageElement.style.opacity = 0;
+        setTimeout(() => {
+          currentHeroIndex = (currentHeroIndex + 1) % heroImages.length;
+          heroImageElement.src = heroImages[currentHeroIndex];
+          heroImageElement.alt = `Promo Image ${currentHeroIndex + 1}`;
+          heroImageElement.style.opacity = 1;
+        }, 500);
+      }
+      heroImageElement.style.opacity = 0;
+      setTimeout(() => heroImageElement.style.opacity = 1, 500);
+      setInterval(changeHeroImage, 3000);
+    </script>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+      {% block content %}
+      <!-- About Section -->
+      <section class="about">
+        <div class="container">
+          <h2 class="text-center mb-5">Our Best Sellers</h2>
+          <div class="row align-items-center g-4">
+            <div class="col-md-6">
+              <h3 class="mb-4">Cheesy Baked Vegetable Rolls</h3>
+              <p>
+                Introduced by French colonialists in the mid-19th century, Vietnam has become one of the largest coffee exporters in the world.
+                Our robusta beans and unique preparation methods elevate your coffee experience.
+              </p>
+              <div class="text-center my-4">
+                <img src="{{ url_for('static', filename='deco.jpg') }}" alt="Coffee Beans" class="img-fluid rounded shadow-sm">
+              </div>
+              <p>
+                Grown in the Central Highlands, our coffee thrives in ideal climates and fertile soils.
+              </p>
+            </div>
+            <div class="col-md-6">
+              <h3 class="text-center mb-4">About Us</h3>
+              <p>
+                Since our inception, we've celebrated Vietnamese coffee culture with a modern twist.
+                Join us in the heart of the Central Highlands for an unparalleled dining experience.
+              </p>
+              <div class="text-center my-4">
+                <img src="{{ url_for('static', filename='image.jpg') }}" alt="Coffee Image" class="img-fluid rounded shadow-sm">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="features py-5">
+        <div class="container">
+          <h2 class="text-center mb-5">Why Choose Us</h2>
+          <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+              <div class="feature-card text-center p-4">
+                <img src="{{ url_for('static', filename='delivery_icon.jpg') }}" alt="Fast Delivery" class="img-fluid mb-3">
+                <h5 class="fw-bold">Fastest Door Delivery</h5>
+                <p class="mb-0" style="color: rgba(17,24,39,.72);">Enjoy your meal delivered swiftly to your doorstep.</p>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="feature-card text-center p-4">
+                <img src="{{ url_for('static', filename='vegetables.jpg') }}" alt="Fresh Beans" class="img-fluid mb-3">
+                <h5 class="fw-bold">Fresh Coffee Beans</h5>
+                <p class="mb-0" style="color: rgba(17,24,39,.72);">Sourced directly from Vietnam’s finest plantations.</p>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="feature-card text-center p-4">
+                <img src="{{ url_for('static', filename='quality_icon.jpg') }}" alt="Quality" class="img-fluid mb-3">
+                <h5 class="fw-bold">Best Quality Coffee</h5>
+                <p class="mb-0" style="color: rgba(17,24,39,.72);">Uncompromising standards for every cup.</p>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="feature-card text-center p-4">
+                <img src="{{ url_for('static', filename='booking_icon.jpg') }}" alt="Booking" class="img-fluid mb-3">
+                <h5 class="fw-bold">Online Table Booking</h5>
+                <p class="mb-0" style="color: rgba(17,24,39,.72);">Reserve your spot with ease.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Offer Section -->
+      <section class="hero text-center text-white d-flex align-items-center justify-content-center">
+        <div class="container-fluid p-0 position-relative px-3 px-lg-5">
+          <img src="{{ url_for('static', filename='bg.jpg') }}" alt="Coffee Shop" class="img-fluid w-100" style="max-height: 60vh; object-fit: cover; border-radius: 24px; box-shadow: var(--shadow);">
+          <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 p-5 rounded" style="width: min(720px, 92%);">
+            <h2 class="display-4 fw-bold">50% OFF</h2>
+            <p class="lead mb-1">Sunday Special Offer</p>
+            <p class="mb-4">Valid Sundays from Jan 1st to Jan 30th, 2025</p>
+            <form class="d-flex justify-content-center gap-2 flex-wrap">
+              <input type="email" class="form-control" placeholder="Your Email" style="max-width: 280px; border-radius: 999px;">
+              <button class="btn btn-warning" style="border-radius: 999px; padding: .55rem 1.25rem;">Sign Up</button>
+            </form>
+          </div>
+        </div>
+      </section>
+      {% endblock %}
     </div>
-  </footer>
 
-  <!-- Bootstrap JS -->
-  <script src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"></script>
-</body>
-  <script>
-    // Sidebar toggle functionality
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const adminSidebar = document.getElementById('adminSidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    <!-- Footer -->
+    <footer class="mt-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4 mb-4">
+            <h5 class="fw-bold">My Restaurant</h5>
+            <p class="small" style="color: rgba(17,24,39,.70);">
+              Crafting exceptional coffee and cuisine since 2020. Visit us for a taste of tradition and innovation.
+            </p>
+          </div>
+          <div class="col-md-4 mb-4">
+            <h5 class="fw-bold">Quick Links</h5>
+            <ul class="list-unstyled">
+              <li><a href="/"><i class="bi bi-house-door-fill me-2"></i>Home</a></li>
+              <li><a href="/cart"><i class="bi bi-cart-fill me-2"></i>Cart</a></li>
+              <li><a href="{{ url_for('transaction_history') }}"><i class="bi bi-clock-history me-2"></i>Transaction History</a></li>
+              {% if username and role == 'admin' %}
+                <li><a href="{{ url_for('dashboard') }}"><i class="bi bi-bar-chart-fill me-2"></i>Dashboard</a></li>
+              {% endif %}
+            </ul>
+          </div>
+          <div class="col-md-4 mb-4">
+            <h5 class="fw-bold">Contact Us</h5>
+            <p class="small" style="color: rgba(17,24,39,.70);">
+              <i class="bi bi-geo-alt-fill me-2"></i>123 Z15 St, Central Thai Nguyen, VN<br>
+              <i class="bi bi-telephone-fill me-2"></i>+84 123 456 789<br>
+              <i class="bi bi-envelope-fill me-2"></i>contact@myrestaurant.com
+            </p>
+            <div class="social-icons">
+              <a href="#"><i class="bi bi-facebook"></i></a>
+              <a href="#"><i class="bi bi-instagram"></i></a>
+              <a href="#"><i class="bi bi-twitter"></i></a>
+              <a href="#"><i class="bi bi-youtube"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="text-center mt-4 border-top pt-3" style="border-color: rgba(17,24,39,.10) !important;">
+          <p class="small mb-0" style="color: rgba(17,24,39,.65);">© 2025 My Restaurant. All Rights Reserved.</p>
+        </div>
+      </div>
+    </footer>
 
-    if (sidebarToggle && adminSidebar && sidebarOverlay) {
-      sidebarToggle.addEventListener('click', function() {
-        adminSidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-      });
+    <!-- Bootstrap JS -->
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"></script>
 
-      sidebarOverlay.addEventListener('click', function() {
-        adminSidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-      });
+    <script>
+      // Sidebar toggle functionality
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const adminSidebar = document.getElementById('adminSidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-      // Close sidebar when clicking on a link
-      const sidebarLinks = adminSidebar.querySelectorAll('.sidebar-item');
-      sidebarLinks.forEach(link => {
-        link.addEventListener('click', function() {
+      if (sidebarToggle && adminSidebar && sidebarOverlay) {
+        sidebarToggle.addEventListener('click', function() {
+          adminSidebar.classList.toggle('active');
+          sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', function() {
           adminSidebar.classList.remove('active');
           sidebarOverlay.classList.remove('active');
         });
-      });
-    }
-  </script>
+
+        // Close sidebar when clicking on a link
+        const sidebarLinks = adminSidebar.querySelectorAll('.sidebar-item');
+        sidebarLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            adminSidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+          });
+        });
+      }
+    </script>
+  </body>
 </html>

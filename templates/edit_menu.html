@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Menu</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* General body and layout */
         body {
@@ -35,6 +36,11 @@
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Form header */
@@ -69,6 +75,7 @@
             border: 2px solid #dfe6e9;
             background: #f9fbfc;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
         input[type="text"]:focus,
@@ -101,6 +108,115 @@
             background: #4527a0;
         }
 
+        /* AI Helper Styles */
+        .ai-helper-section {
+            background: linear-gradient(135deg, rgba(94, 53, 177, 0.1), rgba(142, 36, 170, 0.05));
+            border: 2px solid #5e35b1;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .ai-helper-title {
+            color: #4527a0;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+
+        .ai-helper-title i {
+            color: #e74c3c;
+        }
+
+        .ai-helper-section p {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input,
+        .input-group button {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .input-group button {
+            background: #5e35b1;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .input-group button:hover {
+            background: #4527a0;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #5e35b1;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #5e35b1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .ai-status {
+            font-size: 0.95rem;
+            margin-top: 10px;
+            color: #555;
+        }
+
+        .ai-result-alert {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .ai-result-alert.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .ai-result-alert.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .edit-hint {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: -15px;
+            margin-bottom: 15px;
+        }
+
         /* Image preview */
         .image-preview {
             margin: 20px 0;
@@ -128,7 +244,7 @@
         }
 
         /* Submit button */
-        button {
+        button[type="submit"] {
             flex: 1;
             padding: 14px;
             font-size: 1.1rem;
@@ -141,7 +257,7 @@
             transition: all 0.3s ease;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             background: linear-gradient(45deg, #4527a0, #6d1b7b);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(94, 53, 177, 0.3);
@@ -159,6 +275,9 @@
             border-radius: 12px;
             text-decoration: none;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .cancel-button:hover {
@@ -198,7 +317,7 @@
                 padding: 25px;
             }
 
-            button, .cancel-button {
+            button[type="submit"], .cancel-button {
                 font-size: 1rem;
                 padding: 12px;
             }
@@ -217,23 +336,45 @@
         <div class="success">{{ success_message }}</div>
         {% endif %}
 
+        <!-- AI Helper Section -->
+        <div class="ai-helper-section">
+            <div class="ai-helper-title">
+                <i class="fas fa-magic"></i> AI Dish Assistant
+            </div>
+            <p>Upload a new dish image to update the name and description with AI assistance.</p>
+            
+            <div class="input-group">
+                <input type="file" id="aiImageInput" accept="image/*" placeholder="Upload new image for AI analysis">
+                <button type="button" id="aiAnalyzeBtn">
+                    <i class="fas fa-wand-magic-sparkles"></i> Analyze
+                </button>
+            </div>
+
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <div class="ai-status">Analyzing image...</div>
+            </div>
+
+            <div class="ai-result-alert" id="aiResultAlert"></div>
+        </div>
+
         <label for="name">Name</label>
         <input type="text" id="name" name="name" value="{{ item.name }}" placeholder="Enter menu name" required>
+        <div class="edit-hint">Update with AI or edit manually</div>
 
         <label for="description">Description</label>
         <textarea id="description" name="description" placeholder="Enter menu description" required>{{ item.description }}</textarea>
+        <div class="edit-hint">Update with AI or edit manually</div>
 
         <label for="price">Price</label>
         <input type="number" id="price" name="price" value="{{ item.price }}" step="0.01" placeholder="Enter menu price" required>
 
         <label for="rating">Rating (1-5)</label>
         <input type="number" id="rating" name="rating" value="{{ item.rating }}" step="0.1" min="1" max="5" placeholder="Enter rating" required>
-        <div class="mb-3">
-  <label class="form-label">Category</label>
-  <input class="form-control" name="category" placeholder="Ví dụ: Drinks, Dessert, Main Course"
-         value="{{ item.category if item else '' }}">
-</div>
 
+        <label class="form-label">Category</label>
+        <input type="text" name="category" placeholder="e.g.: Drinks, Dessert, Main Course"
+               value="{{ item.category if item else '' }}">
 
         <!-- Image Upload -->
         <div>
@@ -254,5 +395,56 @@
             <button type="submit">Save Changes</button>
         </div>
     </form>
+
+    <script>
+        document.getElementById('aiAnalyzeBtn').addEventListener('click', async function() {
+            const aiImageInput = document.getElementById('aiImageInput');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const aiResultAlert = document.getElementById('aiResultAlert');
+
+            if (!aiImageInput.files || aiImageInput.files.length === 0) {
+                aiResultAlert.textContent = 'Please select an image first';
+                aiResultAlert.className = 'ai-result-alert error';
+                return;
+            }
+
+            // Show loading
+            loadingSpinner.style.display = 'block';
+            aiResultAlert.className = 'ai-result-alert';
+
+            const formData = new FormData();
+            formData.append('image', aiImageInput.files[0]);
+
+            try {
+                const response = await fetch('/api/analyze_food_image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Fill form with AI results
+                    document.getElementById('name').value = data.name || '';
+                    document.getElementById('description').value = data.description || '';
+
+                    aiResultAlert.innerHTML = `
+                        <strong><i class="fas fa-check-circle"></i> Success!</strong><br>
+                        <strong>Name:</strong> ${data.name}<br>
+                        <strong>Description:</strong> ${data.description.substring(0, 100)}...
+                    `;
+                    aiResultAlert.className = 'ai-result-alert success';
+                } else {
+                    aiResultAlert.textContent = `Error: ${data.error || 'Failed to analyze image'}`;
+                    aiResultAlert.className = 'ai-result-alert error';
+                }
+            } catch (error) {
+                aiResultAlert.textContent = `Error: ${error.message}`;
+                aiResultAlert.className = 'ai-result-alert error';
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
